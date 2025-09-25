@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png">
+  <meta charset="UTF-8">
+  <title>מעיין</title>
+  <style>
+    .main_title {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: bold;
+      margin: 36px 0 32px 0;
+      letter-spacing: 1px;
+      color: #2d2d2d;
+    }
+    .detail_box {
+      max-width: 950px;
+      margin: 0 auto 48px auto;
+      padding: 0 12px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px 24px;
+      justify-content: center;
+    }
+    .col-md-6 {
+      flex: 1 1 340px;
+      max-width: 420px;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .contactCube {
+      background: #fffbe9;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+      padding: 28px 18px 18px 18px;
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-height: 140px;
+      position: relative;
+      border: 1.5px solid #ffe066;
+    }
+    .contactCube h5 {
+      font-size: 1.25em;
+      font-weight: bold;
+      margin: 0 0 6px 0;
+      color: #2d2d2d;
+    }
+    .contactCube h6 {
+      font-size: 1.08em;
+      font-weight: 500;
+      margin: 0 0 12px 0;
+      color: #7a6c3a;
+    }
+    .list-inline {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .list-inline-item a {
+      color: #2d2d2d;
+      text-decoration: none;
+      font-size: 1.08em;
+      background: #ffe066;
+      border-radius: 16px;
+      padding: 6px 14px 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, color 0.2s;
+      font-weight: 500;
+    }
+    .list-inline-item a:hover {
+      background: #fffbe9;
+      color: #b48a00;
+    }
+    .list-inline-item img {
+      width: 22px;
+      height: 22px;
+      margin-right: 2px;
+      vertical-align: middle;
+    }
+    @media (max-width: 900px) {
+      .row {
+        flex-direction: column;
+        gap: 24px 0;
+      }
+      .col-md-6 {
+        max-width: 100%;
+        min-width: 0;
+      }
+    }
+  </style>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:#fffbe9
+    }
+
+    nav {
+      background: linear-gradient(90deg, #f5e9da 60%, #f9f6f2 100%);
+      color: #111;
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+      border-radius: 0 0 18px 18px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .navbar-content {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .navbar-logo {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      transform: translateY(-20px);
+      height: 120px;
+      width: 120px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 1100;
+      overflow: visible;
+    }
+
+    .navbar-logo img {
+      max-height: 120px;
+      max-width: 120px;
+      border-radius: 50%;
+      border: 4px solid #fffbe9;
+      box-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.13);
+      background: #fffbe9;
+      transition: box-shadow 0.3s;
+    }
+
+    .navbar-logo img:hover {
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 36px;
+    }
+
+    nav ul li {
+      display: inline;
+    }
+
+    nav ul li a {
+      color: #111;
+      text-decoration: none;
+      font-size: 1.13em;
+      padding: 10px 18px;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      font-weight: 500;
+    }
+
+    nav ul li a:hover {
+      background: #f3e3c3;
+      color: #004080;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
+    }
+
+    .home-bg-section {
+      width: 100%;
+      min-height: 500px;
+      background: linear-gradient(to left, rgba(0,0,0,0.7), rgba(0,0,0,0)), /* dark overlay */
+    url('books.png') 75% 75%/cover no-repeat;
+
+      position: relative;
+      z-index: 1;
+    }
+
+    .news-ticker-wrapper {
+      width: 100%;
+      background: linear-gradient(90deg, #23242a 80%, #18181c 100%);
+      display: flex;
+      align-items: center;
+      height: 40px;
+      border-bottom: 2px solid #33343a;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.10);
+      font-family: inherit;
+      position: relative;
+      z-index: 900;
+      direction: rtl;
+      backdrop-filter: blur(2px);
+    }
+
+    .news-ticker-label {
+      background: #23242a;
+      color: #ffe066;
+      font-weight: bold;
+      padding: 0 18px 0 0;
+      padding-right: 180px;
+      /* extra space for logo */
+      border-radius: 0 0 12px 0;
+      font-size: 1.08em;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.10);
+      letter-spacing: 1px;
+    }
+
+    .news-ticker {
+      overflow: hidden;
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      position: relative;
+      direction: rtl;
+    }
+
+    .news-ticker-content {
+      display: inline-block;
+      white-space: nowrap;
+      padding-right: 100%;
+      animation: ticker-scroll-rtl 28s linear infinite;
+      font-size: 1.08em;
+      font-weight: 500;
+      direction: rtl;
+    }
+
+    .news-date {
+      color: #ffe066;
+      font-weight: bold;
+      margin: 0 6px 0 2px;
+    }
+
+    .news-update {
+      color: #fff;
+      margin-left: 12px;
+    }
+
+    .news-sep {
+      color: #ffe066;
+      margin: 0 38px;
+      font-size: 1.2em;
+      vertical-align: middle;
+    }
+
+    .home-welcome-content {
+      width: 100%;
+      max-width: 600px;
+      margin-right: 0;
+      margin-left: auto;
+      padding: 60px 48px 0 0;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .home-welcome-box {
+
+      padding-top: 30px;
+      padding-right: 80px;
+    }
+
+    .home-welcome-title {
+      font-size: 4em;
+      color: #fff;
+      margin-bottom: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .home-welcome-desc {
+      font-size: 2.5em;
+      color: #feb72a;
+      margin-bottom: 32px;
+    }
+
+    .home-btns {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .home-btn {
+      min-width: 120px;
+      padding: 12px 22px;
+      font-size: 1.08em;
+      font-weight: 500;
+      color: #000000;
+      background: #fffbe9;
+      border: none;
+      border-radius: 24px 0px 24px 0px;
+      /* top-right and bottom-left are round, others are circle */
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+
+    }
+
+    .home-btn-before {
+      overflow: hidden;
+      border: 1px solid #ffb43b;
+      border-radius: 40px 0 40px 0;
+      padding: 10px;
+    }
+
+    .home-btn:hover {
+      background: #f3e3c3;
+      color: #000000;
+    }
+
+    .home-btn-secondary {
+      background: #fffbe9;
+    }
+
+    .home-btn-secondary:hover {
+      background: #f3e3c3;
+      color: #000000;
+    }
+
+    .home-btn-outline {
+      background: #fffbe9;
+      color: #000000;
+    }
+
+    .home-btn-outline:hover {
+      background: #f3e3c3;
+      color: #000000;
+    }
+
+    .useful-links-section {
+      width: 100%;
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-left: 0;
+      padding-right: 48px;
+    }
+
+    .useful-links-hr {
+      border: none;
+      border-top: 2.5px solid #fff;
+      width: 100%;
+      margin: 0 0 12px 0;
+      opacity: 0.8;
+    }
+
+    .useful-links-title {
+      color: #fff;
+      font-size: 1.3em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-align: right;
+      margin: 12px 0 12px 0;
+      direction: rtl;
+      opacity: 0.95;
+    }
+
+    .useful_link:after {
+      content: "";
+      background: rgb(255 255 255 / 40%);
+      height: 1px;
+      width: 30%;
+      position: absolute;
+      right: 0;
+      top: 50%;
+    }
+
+    .useful_link:before {
+      content: "";
+      background: rgb(255 255 255 / 40%);
+      height: 1px;
+      width: 30%;
+      position: absolute;
+      left: 0;
+      top: 50%;
+    }
+
+    .useful_link {
+      position: relative;
+      color: #fff;
+      font-size: 30px;
+      line-height: 52px;
+      font-weight: 400;
+      text-align: center;
+      max-width: 80%;
+      margin: 10px auto 30px;
+    }
+
+    .useful-links-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .useful-link-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      font-size: 1.15em;
+    }
+
+    .useful-link-item div {
+      color: #fff;
+      font-size: 1.13em;
+      font-weight: 500;
+      text-decoration: none;
+      margin-top: 2px;
+      transition: color 0.2s;
+    }
+
+    .useful-link-item:link,
+    .useful-link-item:visited {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .useful-link-item:hover div {
+      color: #ffe066;
+    }
+
+    .useful-link-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    @keyframes ticker-scroll-rtl {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  </style>
+</head>
+
+<body style="margin:0; padding:0;">
+  <nav>
+    <div class="navbar-content">
+      <div class="navbar-logo">
+        <img src="logo.png" alt="לוגו">
+      </div>
+      <ul>
+        <li><a href="index.html">דף בית</a></li>
+        <li><a href="about.html">אודות</a></li>
+        <li><a href="institutions.html">מוסדות לימוד</a></li>
+        <li><a href="campuses.html">מרחבים</a></li>
+        <li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+        <li><a href="contact.html">יצירת קשר</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div style="height:64px;"></div>
+  <div class="news-ticker-wrapper">
+    <div class="news-ticker-label">מבזקים:</div>
+    <div class="news-ticker">
+      <div class="news-ticker-content" id="newsTickerContent">
+        <span class="news-date">25.09.2025</span> <span class="news-update">הושק האתר החדש של הרשת!</span>
+        <span class="news-sep">•</span>
+        <span class="news-date">24.09.2025</span> <span class="news-update">ההרשמה לשנה"ל תשפ"ו נפתחה</span>
+        <span class="news-sep">•</span>
+        <span class="news-date">20.09.2025</span> <span class="news-update">אירועי קיץ מיוחדים לתלמידים
+          בקרוב</span>
+        <span class="news-sep">•</span>
+        <span class="news-date">18.09.2025</span> <span class="news-update">הצטרפו אלינו לעדכונים שוטפים</span>
+        <span class="news-sep">•</span>
+      </div>
+    </div>
+  </div>
+  <section class="home-bg-section">
+    <div class="home-welcome-box">
+      <h1 class="home-welcome-title">לשכת מנכ"ל</h1>
+      <p class="home-welcome-desc">לשכת מנכ"ל רשת "בני יוסף"</p>
+      
+      </div>
+    </div>
+    
+
+    </div>
+  </section>
+  <section>
+      <div class="ceo-message" style="max-width:900px;margin:0 auto 40px auto;padding:32px 24px 24px 24px;background:#fffbe9;">
+        <h2 style="font-family:'segoe ui',tahoma,arial,sans-serif;font-size:32px;text-align:right;margin-top:0;">דבר המנכ"ל</h2>
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;">
+          <div style="flex:2;min-width:220px;text-align:justify;font-size:24px;direction:rtl;">
+            לשכת המנכ"ל ניצבת בראש הפירמידה של רשת מעיין החינוך התורני <strong>"בני יוסף"</strong>, מובילה את רכבת העשייה הברוכה והינה סמל ודוגמה במתן שירות, בזמינות ובמענה לכל פונה.<br><br>
+            לשכת המנכ"ל ממונה על כלל צורכי מוסדות הרשת. תפקידה לרכז את מכלול הפניות, לתפעל ולסנכרן בין האגפים ולהעמיד לרשות המוסדות את הכלים והעזרה האופטימליים על מנת להביא להצלחתם ולשגשוגם.<br><br>
+            ההשקעה לאורך כל ימות השנה, ובפרט עתה עם התרחבות והגדלת מוסדות הרשת בס"ד, נותנת את אותותיה בכל הרבדים וכולנו שותפים לתחושה הטובה שמורגשת היטב ובצדק בכל המוסדות ברחבי הארץ.<br><br>
+            דלתנו פתוחה לכל פניה, אנו רואים חשיבות רבה במענה לכל שאלה ובקשה וזאת בתיאום מול הלשכה.
+          </div>
+          <div style="flex:1;min-width:180px;text-align:center;">
+            <img src="avigdor.jpg" alt="הרב אביגדור אוחנה" style="width:181px;margin:5px 0 10px 0;border-radius:12px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.10);"><br>
+            <span style="font-size:20px;">הרב אביגדור אוחנה - מ"מ מנכ"ל</span>
+          </div>
+        </div>
+      </div>
+  </section>
+  <section>
+      <div class="col-12">
+        <h2 class="main_title">אנשי קשר</h2>
+        <div class="detail_box">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="contactCube">
+                <h5>הרב אהרון (רוני) דהן</h5>
+                <h6>ראש מטה</h6>
+                <ul class="list-inline">
+                  <li class="list-inline-item"><a href="tel:02-6587766"> 02-6587766 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
+                  <li class="list-inline-item"><a href="mailto:ronid@m-m.org.il">ronid@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
+                </ul>
+              </div>
+              <div class="contactCube">
+                <h5>גב' קדוש שבי</h5>
+                <h6>ראש לשכת מנכ"ל</h6>
+                <ul class="list-inline">
+                  <li class="list-inline-item"><a href="tel:02-6587744"> 02-6587744 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
+                  <li class="list-inline-item"><a href="mailto:Shevi@m-m.org.il">Shevi@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="contactCube">
+                <h5>הרב עותניאל גיגי</h5>
+                <h6>עוזר מנכ"ל</h6>
+                <ul class="list-inline">
+                  <li class="list-inline-item"><a href="tel:02-65877548"> 02-65877548 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
+                  <li class="list-inline-item"><a href="mailto:Otnielg@m-m.org.il">Otnielg@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
+                </ul>
+              </div>
+              <div class="contactCube">
+                <h5>גב' אמיניאן אילנית</h5>
+                <h6>מנהלת לשכת מנכ"ל</h6>
+                <ul class="list-inline">
+                  <li class="list-inline-item"><a href="tel:02-6587755"> 02-6587755 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
+                  <li class="list-inline-item"><a href="mailto:ilanita@m-m.org.il">ilanita@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+
+
+</body>
+
+</html>
