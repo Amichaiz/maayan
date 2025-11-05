@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <link rel="icon" type="image/png" href="logo.png">
+    <meta charset="UTF-8">
+    <title>מוסדות לימוד - מעיין</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        nav {
+            background: linear-gradient(90deg, #f5e9da 60%, #f9f6f2 100%);
+            color: #111;
+            padding: 0 40px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+            border-radius: 0 0 18px 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .navbar-logo {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            transform: translateY(-20px);
+            height: 120px;
+            width: 120px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1100;
+            overflow: visible;
+        }
+
+        .navbar-logo img {
+            max-height: 120px;
+            max-width: 120px;
+            border-radius: 50%;
+            border: 4px solid #fffbe9;
+            box-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.13);
+            background: #fffbe9;
+            transition: box-shadow 0.3s;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 36px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: #111;
+            text-decoration: none;
+            font-size: 1.13em;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover {
+            background: #f3e3c3;
+            color: #004080;
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
+        }
+
+        .institutions-section {
+            padding-top: 100px;
+            min-height: calc(100vh - 100px);
+            background: linear-gradient(to left, rgba(0,0,0,0.7), rgba(0,0,0,0)),
+                url('home.jpg') 75% 75%/cover no-repeat;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .institutions-table-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .institutions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .institutions-table th,
+        .institutions-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+
+        .institutions-table th {
+            background: #f5e9da;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .institutions-table tr:hover {
+            background: rgba(243, 227, 195, 0.3);
+        }
+
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .login-prompt {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 500px;
+            margin: 40px auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-prompt h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .login-prompt p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .login-btn {
+            display: inline-block;
+            background: #fffbe9;
+            color: #000000;
+            padding: 12px 30px;
+            border-radius: 24px 0px 24px 0px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #f3e3c3;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: flex-end;
+        }
+
+        .search-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 200px;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="navbar-content">
+            <div class="navbar-logo">
+                <img src="logo.png" alt="לוגו">
+            </div>
+            <ul>
+                <li><a href="index.html">דף בית</a></li>
+                <li><a href="about.html">אודות</a></li>
+                <li><a href="institutions.html">מוסדות לימוד</a></li>
+                <li><a href="campuses.html">מרחבים</a></li>
+                <li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+                <li><a href="contact.html">יצירת קשר</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="institutions-section">
+        <div class="content-container">
+            <h1 class="section-title">מוסדות לימוד</h1>
+
+            <div class="institutions-table-container">
+                <div class="filter-section">
+                    <input type="text" class="search-input" placeholder="חיפוש מוסד...">
+                    <select class="filter-select">
+                        <option value="">כל המוסדות</option>
+                        <option value="elementary">בתי ספר יסודיים</option>
+                        <option value="middle">חטיבות ביניים</option>
+                        <option value="high">תיכונים</option>
+                    </select>
+                </div>
+
+                <table class="institutions-table">
+                    <thead>
+                        <tr>
+                            <th>שם המוסד</th>
+                            <th>סוג</th>
+                            <th>עיר</th>
+                            <th>טלפון</th>
+                            <th>מנהל/ת</th>
+                            <th>תלמידים</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>בית ספר מעיין החינוך</td>
+                            <td>יסודי</td>
+                            <td>ירושלים</td>
+                            <td>02-1234567</td>
+                            <td>ישראל ישראלי</td>
+                            <td>450</td>
+                        </tr>
+                        <tr>
+                            <td>אולפנת מעיין</td>
+                            <td>תיכון</td>
+                            <td>תל אביב</td>
+                            <td>03-1234567</td>
+                            <td>שרה כהן</td>
+                            <td>380</td>
+                        </tr>
+                        <tr>
+                            <td>ישיבת מעיין החכמה</td>
+                            <td>חטיבה</td>
+                            <td>חיפה</td>
+                            <td>04-1234567</td>
+                            <td>יעקב לוי</td>
+                            <td>280</td>
+                        </tr>
+                        <tr>
+                            <td>מעיין הדעת</td>
+                            <td>יסודי</td>
+                            <td>באר שבע</td>
+                            <td>08-1234567</td>
+                            <td>רחל אברהם</td>
+                            <td>320</td>
+                        </tr>
+                        <tr>
+                            <td>תיכון מעיין התורה</td>
+                            <td>תיכון</td>
+                            <td>נתניה</td>
+                            <td>09-1234567</td>
+                            <td>דוד הכהן</td>
+                            <td>420</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="blur-overlay">
+                    <div class="login-prompt">
+                        <h2>מידע זה זמין למשתמשים רשומים בלבד</h2>
+                        <p>על מנת לצפות בפרטי המוסדות, יש להתחבר למערכת</p>
+                        <a href="login.html" class="login-btn">התחברות למערכת</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
