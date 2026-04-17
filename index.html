@@ -93,6 +93,30 @@
 			box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
 		}
 
+		.navbar-login {
+			position: absolute;
+			left: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			background: #feb72a;
+			color: #2d2d2d;
+			text-decoration: none;
+			font-size: 1.05em;
+			font-weight: 600;
+			padding: 10px 22px;
+			border-radius: 24px 0 24px 0;
+			border: 1px solid #ffb43b;
+			box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+			transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+			z-index: 1200;
+		}
+
+		.navbar-login:hover {
+			background: #fffbe9;
+			color: #004080;
+			box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.15);
+		}
+
 		.home-bg-section {
 			width: 100%;
 			min-height: 500px;
@@ -387,29 +411,14 @@
 			<ul>
 				<li><a href="index.html">דף בית</a></li>
 				<li><a href="about.html">אודות</a></li>
-				<li><a href="institutions.html">מוסדות לימוד</a></li>
-				<li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+				<li><a href="login.html">מוסדות לימוד</a></li>
+				<li><a href="login.html">מאגר פדגוגי</a></li>
 				<li><a href="contact.html">יצירת קשר</a></li>
 			</ul>
+			<a href="login.html" class="navbar-login">כניסה</a>
 		</div>
 	</nav>
 	<div style="height:64px;"></div>
-	<div class="news-ticker-wrapper">
-		<div class="news-ticker-label">מבזקים:</div>
-		<div class="news-ticker">
-			<div class="news-ticker-content" id="newsTickerContent">
-				<span class="news-date">25.09.2025</span> <span class="news-update">הושק האתר החדש של הרשת!</span>
-				<span class="news-sep">•</span>
-				<span class="news-date">24.09.2025</span> <span class="news-update">ההרשמה לשנה"ל תשפ"ו נפתחה</span>
-				<span class="news-sep">•</span>
-				<span class="news-date">20.09.2025</span> <span class="news-update">אירועי קיץ מיוחדים לתלמידים
-					בקרוב</span>
-				<span class="news-sep">•</span>
-				<span class="news-date">18.09.2025</span> <span class="news-update">הצטרפו אלינו לעדכונים שוטפים</span>
-				<span class="news-sep">•</span>
-			</div>
-		</div>
-	</div>
 	<section class="home-bg-section">
 		<div class="home-welcome-box">
 			<h1 class="home-welcome-title">ברוכים הבאים</h1>
@@ -423,28 +432,6 @@
 					<a href="contact.html" class="home-btn home-btn-outline">צור קשר</a>
 				</div>
 			</div>
-		</div>
-		<div>
-			<h3 class="useful_link">קישורים שימושיים</h3>
-			<div class="useful-links-row">
-				<a class="useful-link-item" href="https://infoq8058.unq.co.il/Account/Login" target="_blank">
-					<img src="link.svg" alt="קיוסק מידע">
-					<div>קיוסק מידע</div>
-				</a>
-				<a class="useful-link-item" href="https://noa8058.unq.co.il/Account/Login" target="_blank">
-					<img src="team.svg" alt="מערכת נועה">
-					<div>מערכת נועה</div>
-				</a>
-				<a class="useful-link-item" href="https://my.schooly.co.il/" target="_blank">
-					<img src="schooli.png" alt="סקולי">
-					<div>סקולי</div>
-				</a>
-				<a class="useful-link-item" href="https://emp.m-m.org.il" target="_blank">
-					<img src="teach.svg" alt="מעלה">
-					<div>מעלה</div>
-				</a>
-			</div>
-
 		</div>
 	</section>
 

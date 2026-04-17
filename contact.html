@@ -89,6 +89,30 @@
             box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
         }
 
+        .navbar-login {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #feb72a;
+            color: #2d2d2d;
+            text-decoration: none;
+            font-size: 1.05em;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 24px 0 24px 0;
+            border: 1px solid #ffb43b;
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            z-index: 1200;
+        }
+
+        .navbar-login:hover {
+            background: #fffbe9;
+            color: #004080;
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.15);
+        }
+
         .contact-section {
             width: 100%;
             min-height: calc(100vh - 64px);
@@ -167,15 +191,59 @@
         }
 
         .contact-info {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            margin-top: 20px;
+            text-align: right;
         }
 
-        .contact-info p {
-            margin: 10px 0;
+        .contact-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .contact-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .contact-info-icon {
+            font-size: 1.5em;
+            line-height: 1.2;
+            flex-shrink: 0;
+            width: 32px;
+            text-align: center;
+        }
+
+        .contact-info-body {
+            flex: 1;
+        }
+
+        .contact-info-label {
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: 4px;
+            font-size: 1.05em;
+        }
+
+        .contact-info-value {
             color: #555;
+            line-height: 1.6;
+        }
+
+        .contact-info-value a {
+            color: #004080;
+            text-decoration: none;
+        }
+
+        .contact-info-value a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-info-sub {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -189,20 +257,52 @@
             <ul>
                 <li><a href="index.html">דף בית</a></li>
                 <li><a href="about.html">אודות</a></li>
-                <li><a href="institutions.html">מוסדות לימוד</a></li>
-                <li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+                <li><a href="login.html">מוסדות לימוד</a></li>
+                <li><a href="login.html">מאגר פדגוגי</a></li>
                 <li><a href="contact.html">יצירת קשר</a></li>
             </ul>
+            <a href="login.html" class="navbar-login">כניסה</a>
         </div>
     </nav>
 
     <section class="contact-section">
         <div class="contact-container">
-            <h1 class="contact-title">יצירת קשר</h1>
-            
+            <h1 class="contact-title">צור קשר</h1>
+
             <div class="contact-info">
-                <p>שלחו לנו מייל ישירות:</p>
-                <p><a href="mailto:saran@m-m.org.il">saran@m-m.org.il</a></p>
+                <div class="contact-info-row">
+                    <div class="contact-info-icon">
+                        <img src="phone.svg" alt="טלפון" style="width:28px;height:28px;">
+                    </div>
+                    <div class="contact-info-body">
+                        <div class="contact-info-label">טלפון</div>
+                        <div class="contact-info-value"><a href="tel:02-6587722">02-6587722</a></div>
+                    </div>
+                </div>
+
+                <div class="contact-info-row">
+                    <div class="contact-info-icon">
+                        <img src="link.svg" alt="כתובת" style="width:28px;height:28px;">
+                    </div>
+                    <div class="contact-info-body">
+                        <div class="contact-info-label">כתובתנו</div>
+                        <div class="contact-info-value">
+                            רשת מעיין החינוך התורני בא"י בני יוסף<br>
+                            ע.ר. 580121952<br>
+                            רחוב כנפי נשרים 7, ירושלים, 9546417
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-info-row">
+                    <div class="contact-info-icon">
+                        <img src="mail.svg" alt="מייל" style="width:28px;height:28px;">
+                    </div>
+                    <div class="contact-info-body">
+                        <div class="contact-info-label">מייל לפניות</div>
+                        <div class="contact-info-value"><a href="mailto:info@m-m.org.il">info@m-m.org.il</a></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

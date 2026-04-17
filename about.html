@@ -189,6 +189,30 @@
       box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
     }
 
+    .navbar-login {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #feb72a;
+      color: #2d2d2d;
+      text-decoration: none;
+      font-size: 1.05em;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 24px 0 24px 0;
+      border: 1px solid #ffb43b;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      z-index: 1200;
+    }
+
+    .navbar-login:hover {
+      background: #fffbe9;
+      color: #004080;
+      box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.15);
+    }
+
     .home-bg-section {
       width: 100%;
       min-height: 500px;
@@ -483,101 +507,58 @@
       <ul>
         <li><a href="index.html">דף בית</a></li>
         <li><a href="about.html">אודות</a></li>
-        <li><a href="institutions.html">מוסדות לימוד</a></li>
-        <li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+        <li><a href="login.html">מוסדות לימוד</a></li>
+        <li><a href="login.html">מאגר פדגוגי</a></li>
         <li><a href="contact.html">יצירת קשר</a></li>
       </ul>
+      <a href="login.html" class="navbar-login">כניסה</a>
     </div>
   </nav>
   <div style="height:64px;"></div>
-  <div class="news-ticker-wrapper">
-    <div class="news-ticker-label">מבזקים:</div>
-    <div class="news-ticker">
-      <div class="news-ticker-content" id="newsTickerContent">
-        <span class="news-date">25.09.2025</span> <span class="news-update">הושק האתר החדש של הרשת!</span>
-        <span class="news-sep">•</span>
-        <span class="news-date">24.09.2025</span> <span class="news-update">ההרשמה לשנה"ל תשפ"ו נפתחה</span>
-        <span class="news-sep">•</span>
-        <span class="news-date">20.09.2025</span> <span class="news-update">אירועי קיץ מיוחדים לתלמידים
-          בקרוב</span>
-        <span class="news-sep">•</span>
-        <span class="news-date">18.09.2025</span> <span class="news-update">הצטרפו אלינו לעדכונים שוטפים</span>
-        <span class="news-sep">•</span>
-      </div>
-    </div>
-  </div>
   <section class="home-bg-section">
     <div class="home-welcome-box">
-      <h1 class="home-welcome-title">לשכת מנכ"ל</h1>
-      <p class="home-welcome-desc">לשכת מנכ"ל רשת "בני יוסף"</p>
-      
-      </div>
+      <h1 class="home-welcome-title">אודות</h1>
+      <p class="home-welcome-desc">רשת החינוך "בני יוסף"</p>
     </div>
-    
+  </section>
+  <section>
+    <div class="about-content" style="max-width:950px;margin:40px auto;padding:32px 28px;background:#fffbe9;border-radius:12px;box-shadow:0 2px 12px 0 rgba(0,0,0,0.06);direction:rtl;text-align:right;font-size:18px;line-height:1.8;color:#2d2d2d;">
+      <h2 style="font-size:28px;margin-top:0;margin-bottom:18px;">אודות רשת החינוך "בני יוסף" – מרכז מעיין החינוך התורני</h2>
 
+      <h3 style="font-size:22px;margin-top:24px;margin-bottom:10px;color:#7a5a00;">מי אנחנו?</h3>
+      <p style="margin:0 0 16px 0;">
+        רשת החינוך "בני יוסף" (המוכרת רשמית כעמותת "רשת מעיין החינוך התורני בארץ ישראל") היא אחת מרשתות החינוך המובילות והגדולות בישראל. הרשת הוקמה בשנת 1984 במטרה להעניק חינוך תורני איכותי ומקצועי לילדי ישראל, תוך שימור וטיפוח מורשת יהדות ספרד ועדות המזרח.
+      </p>
+      <p style="margin:0 0 16px 0;">
+        הרשת פועלת בפריסה ארצית רחבה, מאילת בדרום ועד מעלות שבקו העימות בצפון, ומפעילה מאות מוסדות חינוך הכוללים תלמודי תורה, בתי ספר יסודיים ותיכונים (K-12).
+      </p>
+
+      <h3 style="font-size:22px;margin-top:24px;margin-bottom:10px;color:#7a5a00;">החזון החינוכי שלנו</h3>
+      <p style="margin:0 0 16px 0;">
+        אנו מאמינים בשילוב של מצוינות לימודית לצד ערכים של תורת ישראל, אהבת ישראל וכיבוד אב ואם. המערך החינוכי של הרשת נבנה כדי להעניק לכל תלמיד ותלמידה ארגז כלים רוחני ולימודי שיאפשר להם לצמוח כאזרחים תורמים ומשפיעים בחברה הישראלית. כל מוסדות הרשת מלמדים לימודי ליב"ה לפי דרישות משרד החינוך.
+      </p>
+
+      <h3 style="font-size:22px;margin-top:24px;margin-bottom:10px;color:#7a5a00;">פעילות הארגון</h3>
+      <p style="margin:0 0 12px 0;">
+        הרשת פועלת כזרם חינוכי מוכר שאינו רשמי (מוכש"ר) תחת פיקוח ובקרה של משרד החינוך הישראלי. פעילותנו הענפה כוללת:
+      </p>
+      <ul style="margin:0 0 16px 0;padding-right:22px;">
+        <li style="margin-bottom:8px;"><strong>מוסדות חינוך יסודי ועל-יסודי:</strong> הפעלת למעלה מ-300 בתי ספר ותלמודי תורה ברחבי הארץ.</li>
+        <li style="margin-bottom:8px;"><strong>הכשרת צוותי הוראה:</strong> ליווי פדגוגי והשתלמויות מקצועיות לאלפי אנשי חינוך וצוותי מינהל.</li>
+        <li style="margin-bottom:8px;"><strong>שיפור תשתיות פיזיות:</strong> דאגה למבני חינוך מודרניים ובטיחותיים העומדים בסטנדרטים הגבוהים ביותר.</li>
+      </ul>
+
+      <h3 style="font-size:22px;margin-top:24px;margin-bottom:10px;color:#7a5a00;">מספרים ונתונים (נכון לשנת הלימודים תשפ"ו)</h3>
+      <ul style="margin:0 0 16px 0;padding-right:22px;">
+        <li style="margin-bottom:8px;">מעל 60,000 תלמידים ותלמידות הלומדים במוסדות הרשת.</li>
+        <li style="margin-bottom:8px;"><strong>פריסה ארצית:</strong> פעילות בלמעלה מ-70 רשויות מקומיות בישראל.</li>
+        <li style="margin-bottom:8px;"><strong>כוח אדם:</strong> הרשת מעסיקה צוות מקצועי של קרוב ל-10,000 עובדים, מורים ואנשי צוות עזר.</li>
+      </ul>
+
+      <p style="margin:24px 0 0 0;font-weight:500;">
+        רשת "בני יוסף" ממשיכה להתפתח ולהוביל את עולם החינוך התורני בישראל, מתוך מחויבות עמוקה לעתיד הדורות הבאים ולמסורת ישראל סבא.
+      </p>
     </div>
-  </section>
-  <section>
-      <div class="ceo-message" style="max-width:900px;margin:0 auto 40px auto;padding:32px 24px 24px 24px;background:#fffbe9;">
-        <h2 style="font-family:'segoe ui',tahoma,arial,sans-serif;font-size:32px;text-align:right;margin-top:0;">דבר המנכ"ל</h2>
-        <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;">
-          <div style="flex:2;min-width:220px;text-align:justify;font-size:24px;direction:rtl;">
-            לשכת המנכ"ל ניצבת בראש הפירמידה של רשת מעיין החינוך התורני <strong>"בני יוסף"</strong>, מובילה את רכבת העשייה הברוכה והינה סמל ודוגמה במתן שירות, בזמינות ובמענה לכל פונה.<br><br>
-            לשכת המנכ"ל ממונה על כלל צורכי מוסדות הרשת. תפקידה לרכז את מכלול הפניות, לתפעל ולסנכרן בין האגפים ולהעמיד לרשות המוסדות את הכלים והעזרה האופטימליים על מנת להביא להצלחתם ולשגשוגם.<br><br>
-            ההשקעה לאורך כל ימות השנה, ובפרט עתה עם התרחבות והגדלת מוסדות הרשת בס"ד, נותנת את אותותיה בכל הרבדים וכולנו שותפים לתחושה הטובה שמורגשת היטב ובצדק בכל המוסדות ברחבי הארץ.<br><br>
-            דלתנו פתוחה לכל פניה, אנו רואים חשיבות רבה במענה לכל שאלה ובקשה וזאת בתיאום מול הלשכה.
-          </div>
-          <div style="flex:1;min-width:180px;text-align:center;">
-            <img src="avigdor.jpg" alt="הרב אביגדור אוחנה" style="width:181px;margin:5px 0 10px 0;border-radius:12px;box-shadow:0 2px 8px 0 rgba(0,0,0,0.10);"><br>
-            <span style="font-size:20px;">הרב אביגדור אוחנה - מ"מ מנכ"ל</span>
-          </div>
-        </div>
-      </div>
-  </section>
-  <section>
-      <div class="col-12">
-        <h2 class="main_title">אנשי קשר</h2>
-        <div class="detail_box">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="contactCube">
-                <h5>הרב אהרון (רוני) דהן</h5>
-                <h6>ראש מטה</h6>
-                <ul class="list-inline">
-                  <li class="list-inline-item"><a href="tel:02-6587766"> 02-6587766 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
-                  <li class="list-inline-item"><a href="mailto:ronid@m-m.org.il">ronid@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
-                </ul>
-              </div>
-              <div class="contactCube">
-                <h5>גב' קדוש שבי</h5>
-                <h6>ראש לשכת מנכ"ל</h6>
-                <ul class="list-inline">
-                  <li class="list-inline-item"><a href="tel:02-6587744"> 02-6587744 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
-                  <li class="list-inline-item"><a href="mailto:Shevi@m-m.org.il">Shevi@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="contactCube">
-                <h5>הרב עותניאל גיגי</h5>
-                <h6>עוזר מנכ"ל</h6>
-                <ul class="list-inline">
-                  <li class="list-inline-item"><a href="tel:02-65877548"> 02-65877548 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
-                  <li class="list-inline-item"><a href="mailto:Otnielg@m-m.org.il">Otnielg@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
-                </ul>
-              </div>
-              <div class="contactCube">
-                <h5>גב' אמיניאן אילנית</h5>
-                <h6>מנהלת לשכת מנכ"ל</h6>
-                <ul class="list-inline">
-                  <li class="list-inline-item"><a href="tel:02-6587755"> 02-6587755 <img src="phone.svg" alt="טלפון" class="img-fluid"></a></li>
-                  <li class="list-inline-item"><a href="mailto:ilanita@m-m.org.il">ilanita@m-m.org.il <img src="mail.svg" alt="אימייל"></a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
   </section>
 
 
