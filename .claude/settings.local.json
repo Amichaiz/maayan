@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "Bash(python -m pip install openpyxl)",
+      "Bash(python build_institutions.py)",
+      "Bash(python geocode_and_build.py)",
+      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Select-Object Id,StartTime,CPU\")"
+    ]
+  }
+}

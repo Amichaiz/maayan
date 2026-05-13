@@ -4,11 +4,18 @@
 <head>
     <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>מוסדות לימוד - מעיין</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
+            background: #faf6ef;
         }
 
         nav {
@@ -69,9 +76,7 @@
             gap: 36px;
         }
 
-        nav ul li {
-            display: inline;
-        }
+        nav ul li { display: inline; }
 
         nav ul li a {
             color: #111;
@@ -90,125 +95,194 @@
         }
 
         .institutions-section {
-            padding-top: 100px;
-            min-height: calc(100vh - 100px);
-            background: linear-gradient(to left, rgba(0,0,0,0.7), rgba(0,0,0,0)),
-                url('home.jpg') 75% 75%/cover no-repeat;
+            padding: 100px 24px 60px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2d1f14 0%, #5a3a22 40%, #a87142 75%, #d9a566 100%);
         }
 
         .content-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 20px;
         }
 
         .section-title {
             color: #fff;
-            font-size: 2.5em;
+            font-size: 2.6em;
             text-align: center;
-            margin-bottom: 40px;
+            margin: 0 0 10px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
 
-        .institutions-table-container {
-            position: relative;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 40px;
-            overflow: hidden;
+        .section-subtitle {
+            color: #fffbe9;
+            text-align: center;
+            margin: 0 0 32px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .institutions-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 18px;
+        }
+
+        .result-count {
+            margin-inline-end: auto;
+            color: #5a3a22;
+            font-weight: 600;
+            font-size: 1.02em;
+        }
+
+        .search-input,
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid #e2d6c2;
+            border-radius: 10px;
+            background: #fffdf7;
+            font-size: 0.98em;
+            font-family: inherit;
+            color: #333;
+            transition: border 0.15s, box-shadow 0.15s;
+        }
+
+        .search-input { width: 260px; }
+
+        .search-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: #c89060;
+            box-shadow: 0 0 0 3px rgba(200, 144, 96, 0.18);
+        }
+
+        .clear-btn {
+            padding: 10px 16px;
+            background: #f5e9da;
+            color: #5a3a22;
+            border: 1px solid #e2d6c2;
+            border-radius: 10px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        .clear-btn:hover { background: #ecdcc2; }
+
+        .table-scroll {
+            max-height: 65vh;
+            overflow-y: auto;
+            border: 1px solid #efe5d3;
+            border-radius: 10px;
         }
 
         .institutions-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.96em;
         }
 
-        .institutions-table th,
-        .institutions-table td {
-            padding: 15px;
-            text-align: right;
-            border-bottom: 1px solid #eee;
-        }
-
-        .institutions-table th {
-            background: #f5e9da;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .institutions-table tr:hover {
-            background: rgba(243, 227, 195, 0.3);
-        }
-
-        .blur-overlay {
-            position: absolute;
+        .institutions-table thead th {
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            backdrop-filter: blur(8px);
-            background: rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
+            background: linear-gradient(180deg, #f5e9da 0%, #ecdcc2 100%);
+            color: #3b2814;
+            font-weight: 700;
+            padding: 13px 14px;
+            text-align: right;
+            border-bottom: 2px solid #d9c6a5;
+            white-space: nowrap;
+            z-index: 2;
         }
 
-        .login-prompt {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 500px;
-            margin: 40px auto;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        .institutions-table tbody td {
+            padding: 11px 14px;
+            text-align: right;
+            border-bottom: 1px solid #f1eadb;
+            color: #2d2418;
+            vertical-align: top;
         }
 
-        .login-prompt h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
+        .institutions-table tbody tr:nth-child(even) td { background: #fbf6ec; }
+        .institutions-table tbody tr:hover td { background: #fdf1d6; }
 
-        .login-prompt p {
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .login-btn {
+        .badge {
             display: inline-block;
-            background: #fffbe9;
-            color: #000000;
-            padding: 12px 30px;
-            border-radius: 24px 0px 24px 0px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge-stage { background: #fff3d6; color: #7a4d1a; border: 1px solid #f0d89b; }
+        .badge-gender-בנים { background: #e2eefc; color: #1d4a85; border: 1px solid #c4ddf6; }
+        .badge-gender-בנות { background: #fde2ec; color: #8a2a52; border: 1px solid #f6c4d6; }
+
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: #8a6a45;
+            font-size: 1.1em;
         }
 
-        .login-btn:hover {
-            background: #f3e3c3;
-        }
+        /* Scrollbar styling */
+        .table-scroll::-webkit-scrollbar { width: 10px; }
+        .table-scroll::-webkit-scrollbar-track { background: #f9f0df; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #d9b988; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #c89c63; }
 
-        .filter-section {
-            margin-bottom: 20px;
+        .map-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .map-header {
             display: flex;
-            gap: 20px;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
         }
-
-        .search-input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            width: 200px;
+        .map-title { margin: 0; color: #3b2814; font-size: 1.35em; font-weight: 700; }
+        .map-meta { color: #7a5a32; font-size: 0.95em; }
+        #map {
+            width: 100%;
+            height: 560px;
+            border-radius: 12px;
+            border: 1px solid #efe5d3;
+            touch-action: none;
+            overscroll-behavior: contain;
         }
+        .leaflet-popup-content {
+            direction: rtl;
+            text-align: right;
+            font-family: Arial, sans-serif;
+            min-width: 220px;
+        }
+        .leaflet-popup-content strong { color: #3b2814; font-size: 1.05em; }
+        .leaflet-popup-content .meta { color: #6b4d28; font-size: 0.92em; margin-top: 6px; line-height: 1.5; }
+        .leaflet-popup-content a { color: #8a4d10; text-decoration: none; }
 
-        .filter-select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: white;
+        @media (max-width: 720px) {
+            .search-input { width: 100%; }
+            .filter-section { justify-content: stretch; }
+            .result-count { width: 100%; text-align: right; margin-inline-end: 0; }
+            .section-title { font-size: 2em; }
         }
     </style>
 </head>
@@ -223,7 +297,7 @@
                 <li><a href="index.html">דף בית</a></li>
                 <li><a href="about.html">אודות</a></li>
                 <li><a href="institutions.html">מוסדות לימוד</a></li>
-                <li><a href="pedagogy.html">מאגר פדגוגי</a></li>
+                <li><a href="login.html">מאגר פדגוגי</a></li>
                 <li><a href="contact.html">יצירת קשר</a></li>
             </ul>
         </div>
@@ -232,83 +306,198 @@
     <section class="institutions-section">
         <div class="content-container">
             <h1 class="section-title">מוסדות לימוד</h1>
+            <p class="section-subtitle">רשימת כל המוסדות במאגר</p>
 
-            <div class="institutions-table-container">
+            <div class="institutions-card">
                 <div class="filter-section">
-                    <input type="text" class="search-input" placeholder="חיפוש מוסד...">
-                    <select class="filter-select">
-                        <option value="">כל המוסדות</option>
-                        <option value="elementary">בתי ספר יסודיים</option>
-                        <option value="middle">חטיבות ביניים</option>
-                        <option value="high">תיכונים</option>
+                    <span class="result-count" id="resultCount"></span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="חיפוש לפי שם מוסד, ישוב, כתובת, מנהל...">
+                    <select id="stageFilter" class="filter-select">
+                        <option value="">כל שלבי החינוך</option>
                     </select>
+                    <select id="genderFilter" class="filter-select">
+                        <option value="">כל המגדרים</option>
+                    </select>
+                    <button class="clear-btn" id="clearBtn" type="button">נקה</button>
                 </div>
 
-                <table class="institutions-table">
-                    <thead>
-                        <tr>
-                            <th>שם המוסד</th>
-                            <th>סוג</th>
-                            <th>עיר</th>
-                            <th>טלפון</th>
-                            <th>מנהל/ת</th>
-                            <th>תלמידים</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>בית ספר מעיין החינוך</td>
-                            <td>יסודי</td>
-                            <td>ירושלים</td>
-                            <td>02-1234567</td>
-                            <td>ישראל ישראלי</td>
-                            <td>450</td>
-                        </tr>
-                        <tr>
-                            <td>אולפנת מעיין</td>
-                            <td>תיכון</td>
-                            <td>תל אביב</td>
-                            <td>03-1234567</td>
-                            <td>שרה כהן</td>
-                            <td>380</td>
-                        </tr>
-                        <tr>
-                            <td>ישיבת מעיין החכמה</td>
-                            <td>חטיבה</td>
-                            <td>חיפה</td>
-                            <td>04-1234567</td>
-                            <td>יעקב לוי</td>
-                            <td>280</td>
-                        </tr>
-                        <tr>
-                            <td>מעיין הדעת</td>
-                            <td>יסודי</td>
-                            <td>באר שבע</td>
-                            <td>08-1234567</td>
-                            <td>רחל אברהם</td>
-                            <td>320</td>
-                        </tr>
-                        <tr>
-                            <td>תיכון מעיין התורה</td>
-                            <td>תיכון</td>
-                            <td>נתניה</td>
-                            <td>09-1234567</td>
-                            <td>דוד הכהן</td>
-                            <td>420</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="blur-overlay">
-                    <div class="login-prompt">
-                        <h2>מידע זה זמין למשתמשים רשומים בלבד</h2>
-                        <p>על מנת לצפות בפרטי המוסדות, יש להתחבר למערכת</p>
-                        <a href="login.html" class="login-btn">התחברות למערכת</a>
-                    </div>
+                <div class="table-scroll">
+                    <table class="institutions-table">
+                        <thead>
+                            <tr>
+                                <th>סמל מוסד</th>
+                                <th>שם המוסד</th>
+                                <th>ישוב</th>
+                                <th>שלב חינוך</th>
+                                <th>מגדר</th>
+                                <th>כתובת</th>
+                                <th>מנהל/ת</th>
+                                <th>טלפון</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
                 </div>
+            </div>
+
+            <div class="map-card">
+                <div class="map-header">
+                    <h2 class="map-title">מפת המוסדות</h2>
+                    <span class="map-meta" id="mapMeta"></span>
+                </div>
+                <div id="map"></div>
             </div>
         </div>
     </section>
+
+    <script id="mosdotData" type="application/json">[{"code": "430140", "city": "אדם", "name": "אור פנחס", "stage": "יסודי", "gender": "בנים", "address": "שדרות אדם 55, ישוב אדם, גבע בנימין", "principal": "הרב יהודה פנחסוב", "phone": "02-6569565", "lat": 31.7484419, "lng": 35.2308841, "geo_src": "אדם, Israel"}, {"code": "430140", "city": "אדם", "name": "אור פנחס", "stage": "יסודי", "gender": "בנות", "address": "שדרות אדם 55, ישוב אדם, גבע בנימין", "principal": "גב' מיכל רם", "phone": "02-6569565", "lat": 31.747941899999997, "lng": 35.2308841, "geo_src": "אדם, Israel"}, {"code": "613976", "city": "אופקים", "name": "דרכי חיים", "stage": "יסודי", "gender": "בנים", "address": "החיד\"א 21, אופקים", "principal": "הרב חיים פילו", "phone": "08-9960906", "lat": 31.3083397, "lng": 34.6269029, "geo_src": "החיד\"א 21, אופקים, Israel"}, {"code": "613976", "city": "אופקים", "name": "בני הישיבות", "stage": "יסודי", "gender": "בנים", "address": "חפץ חיים 20, אופקים", "principal": "הרב אברהם אטיאס", "phone": "", "lat": 31.307047400000002, "lng": 34.625615, "geo_src": "חפץ חיים 20, אופקים, Israel"}, {"code": "614297", "city": "אופקים", "name": "שושנים", "stage": "יסודי", "gender": "בנות", "address": "חפץ חיים 26, אופקים", "principal": "גב' אושרית כרמי", "phone": "08-9960634", "lat": 31.3065474, "lng": 34.625615, "geo_src": "חפץ חיים 26, אופקים, Israel"}, {"code": "658609", "city": "אור יהודה", "name": "שיח בני יוסף", "stage": "יסודי", "gender": "בנים", "address": "לוס קלאר  אור יהודה", "principal": "הרב יוסף קטנוב", "phone": "03-6432693", "lat": 32.0270045, "lng": 34.8629898, "geo_src": "אור יהודה, Israel"}, {"code": "313544", "city": "אור עקיבא", "name": "אור שלום", "stage": "יסודי", "gender": "בנים", "address": "דוד אלעזר 6 אור עקיבא", "principal": "הרב יוסף חיים נדב", "phone": "04-6260701", "lat": 32.5132379, "lng": 34.9141737, "geo_src": "דוד אלעזר 6 אור עקיבא, Israel"}, {"code": "313544", "city": "אור עקיבא", "name": "אור שלום", "stage": "יסודי", "gender": "בנות", "address": "דוד אלעזר 6 אור עקיבא", "principal": "הרב יוסף חיים נדב", "phone": "04-6260701", "lat": 32.5127379, "lng": 34.9141737, "geo_src": "דוד אלעזר 6 אור עקיבא, Israel"}, {"code": "417964", "city": "אחיעזר", "name": "הרש\"ש", "stage": "יסודי", "gender": "בנים", "address": "רח' היסמין 22, מושב אחיעזר", "principal": "הרב מרדכי מעודה", "phone": "08-9152807", "lat": 31.981357600000003, "lng": 34.8716734, "geo_src": "אחיעזר, Israel"}, {"code": "417964", "city": "אחיעזר", "name": "הרש\"ש", "stage": "יסודי", "gender": "בנות", "address": "רח' היסמין 22, מושב אחיעזר", "principal": "הרב מרדכי מעודה", "phone": "08-9152807", "lat": 31.9808576, "lng": 34.8716734, "geo_src": "אחיעזר, Israel"}, {"code": "772442", "city": "אחיסמך", "name": "יעלת חן", "stage": "תיכון", "gender": "בנות", "address": "אלישיב 1, לוד", "principal": "הגב' הדס כהן", "phone": "", "lat": 31.935556, "lng": 34.908056, "geo_src": "אחיסמך, Israel"}, {"code": "612853", "city": "אילת", "name": "אילת השחר", "stage": "יסודי", "gender": "בנים", "address": "שכ' הדקל נחשון 36 אילת", "principal": "הרב יואב חנו", "phone": "08-6336692", "lat": 29.5571848, "lng": 34.9497949, "geo_src": "אילת, Israel"}, {"code": "612853", "city": "אילת", "name": "אילת השחר", "stage": "יסודי", "gender": "בנות", "address": "שכ' הדקל נחשון 36 אילת", "principal": "גב' עידית חנו", "phone": "08-6336692", "lat": 29.5566848, "lng": 34.9497949, "geo_src": "אילת, Israel"}, {"code": "647149", "city": "אלעד", "name": "אורחות חנה", "stage": "יסודי", "gender": "בנות", "address": "יהודה הנשיא 53 אלעד", "principal": "גב' מילכה קוביוף", "phone": "03-5050182", "lat": 32.0515586, "lng": 34.9539447, "geo_src": "יהודה הנשיא 53 אלעד, Israel"}, {"code": "410555", "city": "אלעד", "name": "אור אסתר (אור המאיר)", "stage": "יסודי", "gender": "בנות", "address": "יהודה הנשיא 53 אלעד", "principal": "גב' דליה אליאס", "phone": "03-8030080", "lat": 32.0510586, "lng": 34.9539447, "geo_src": "יהודה הנשיא 53 אלעד, Israel"}, {"code": "415059", "city": "אלעד", "name": "בית מרגלית", "stage": "יסודי", "gender": "בנות", "address": "ר' טרפון 1 אלעד", "principal": "גב' נטלי דוידוב", "phone": "03-9160846", "lat": 32.0500659, "lng": 34.9521522, "geo_src": "אלעד, Israel"}, {"code": "442517", "city": "אלעד", "name": "בית מרגלית", "stage": "תיכון", "gender": "בנות", "address": "רבי טרפון 1, אלעד", "principal": "גב' אורלי אלבז", "phone": "03-6022113", "lat": 32.0484344, "lng": 34.9478148, "geo_src": "רבי טרפון 1, אלעד, Israel"}, {"code": "338749", "city": "אלעד", "name": "בית מרגלית החדש", "stage": "יסודי", "gender": "בנות", "address": "יהושע 3, אלעד", "principal": "גב' רחל נגר", "phone": "", "lat": 32.0554719, "lng": 34.9599244, "geo_src": "יהושע 3, אלעד, Israel"}, {"code": "350983", "city": "אלעד", "name": "דעת יוסף", "stage": "יסודי", "gender": "בנים", "address": "רש\"י 5 אלעד", "principal": "הרב יעקב פרטוש", "phone": "03-9326277", "lat": 32.0487761, "lng": 34.9561676, "geo_src": "רש\"י 5 אלעד, Israel"}, {"code": "415661", "city": "אלעד", "name": "דרך המלך/מאור ישראל", "stage": "יסודי", "gender": "בנים", "address": "רבי חייא 11, אלעד", "principal": "הרב שלום פרץ", "phone": "03-9097530 שלוחה 3", "lat": 32.0511448, "lng": 34.9647238, "geo_src": "רבי חייא 11, אלעד, Israel"}, {"code": "338178", "city": "אלעד", "name": "דרך התורה", "stage": "יסודי", "gender": "בנים", "address": "בן זכאי 79 אלעד", "principal": "הרב אלישיב קוביוף", "phone": "03-9171900", "lat": 32.048469600000004, "lng": 34.9651581, "geo_src": "בן זכאי 79 אלעד, Israel"}, {"code": "241018", "city": "אלעד", "name": "מעיין החינוך התורני-אור המאיר", "stage": "יסודי", "gender": "בנים", "address": "בן זכאי 79, אלעד", "principal": "הרב מיכאל סעדיה", "phone": "03-9063863 שלוחה 1", "lat": 32.0479696, "lng": 34.9651581, "geo_src": "בן זכאי 79, אלעד, Israel"}, {"code": "416347", "city": "אלעד", "name": "פרי תואר", "stage": "יסודי", "gender": "בנים", "address": "בן זכאי 38, אלעד", "principal": "הרב אפרים אורשלימי", "phone": "03-9074485", "lat": 32.0469852, "lng": 34.9590099, "geo_src": "בן זכאי 38, אלעד, Israel"}, {"code": "416545", "city": "אלעד", "name": "פרי תואר", "stage": "יסודי", "gender": "בנות", "address": "בן זכאי 36, אלעד", "principal": "גב' אורית זביחי", "phone": "073-2445533", "lat": 32.0473334, "lng": 34.9565011, "geo_src": "בן זכאי 36, אלעד, Israel"}, {"code": "442558", "city": "אלעד", "name": "מוריה", "stage": "יסודי", "gender": "בנים", "address": "שמאי 20, אלעד", "principal": "הרב יששכר רקובר", "phone": "03-9090422", "lat": 32.0488389, "lng": 34.9493161, "geo_src": "שמאי 20, אלעד, Israel"}, {"code": "756320", "city": "אריאל", "name": "נווה אריאל", "stage": "יסודי", "gender": "בנים", "address": "השומרון 31 , אריאל", "principal": "הרב עמירם סבן", "phone": "03-9060948", "lat": 31.7903547, "lng": 35.2032791, "geo_src": "אריאל, Israel"}, {"code": "414292", "city": "אריאל", "name": "נווה אריאל", "stage": "יסודי", "gender": "בנות", "address": "השומרון 35 , אריאל", "principal": "גב' אורלי לוי", "phone": "03-9060948", "lat": 31.7898547, "lng": 35.2032791, "geo_src": "אריאל, Israel"}, {"code": "614917", "city": "אשדוד", "name": "אור מאיר", "stage": "יסודי", "gender": "בנים", "address": "התלמוד 17 אשדוד", "principal": "הרב מאיר עמר", "phone": "08-8670628", "lat": 31.7923918, "lng": 34.6641842, "geo_src": "התלמוד 17 אשדוד, Israel"}, {"code": "615310", "city": "אשדוד", "name": "אור מלכה / אהבת ישראל", "stage": "יסודי", "gender": "בנות", "address": "דוד בוזגלו 21, אשדוד", "principal": "גב' רחל אסרף", "phone": "08-8679310", "lat": 31.7875395, "lng": 34.6603228, "geo_src": "דוד בוזגלו 21, אשדוד, Israel"}, {"code": "615039", "city": "אשדוד", "name": "אורות התורה / קדם מפעליו", "stage": "יסודי", "gender": "בנים", "address": "בעל הנס 46, אשדוד", "principal": "הרב אשר מאיר קרסיינטה", "phone": "08-6675239", "lat": 31.7886978, "lng": 34.6615015, "geo_src": "בעל הנס 46, אשדוד, Israel"}, {"code": "610832", "city": "אשדוד", "name": "אורות מרגלית", "stage": "יסודי", "gender": "בנות", "address": "חטיבת הנגב 45, כניסה מיצחק בוסקילה", "principal": "גב' מרים שבתאי", "phone": "08-6675240", "lat": 31.795991100000002, "lng": 34.6488659, "geo_src": "אשדוד, Israel"}, {"code": "614933", "city": "אשדוד", "name": "בית יוסף", "stage": "יסודי", "gender": "בנים", "address": "העבודה 65, אשדוד", "principal": "הרב דניאל מזוז\nהרב יואל דהן (הרב סולי)", "phone": "08-8565272", "lat": 31.8076226, "lng": 34.6648038, "geo_src": "העבודה 65, אשדוד, Israel"}, {"code": "615005", "city": "אשדוד", "name": "בית יעקב עוז והדר", "stage": "יסודי", "gender": "בנות", "address": "התלמוד 5 רובע ז' אשדוד", "principal": "גב' רבקה בן יעקב", "phone": "08-8677040", "lat": 31.7918918, "lng": 34.6641842, "geo_src": "התלמוד 5 רובע ז' אשדוד, Israel"}, {"code": "612226", "city": "אשדוד", "name": "חזון מאיר", "stage": "יסודי", "gender": "בנים", "address": "אור לציון פינת התלמוד 17 אשדוד (קראוונים)", "principal": "הרב צוריאל דואני", "phone": "08-8659967", "lat": 31.7954911, "lng": 34.6488659, "geo_src": "אשדוד, Israel"}, {"code": "611103", "city": "אשדוד", "name": "חניכי הישיבות", "stage": "יסודי", "gender": "בנים", "address": "אור לציון 7 אשדוד", "principal": "הרב יהודה דוידי", "phone": "08-8666902", "lat": 31.790038, "lng": 34.6631732, "geo_src": "אור לציון 7 אשדוד, Israel"}, {"code": "745208", "city": "אשדוד", "name": "מורשה-חנ\"מ", "stage": "יסודי", "gender": "בנים", "address": "אחיעזר 2 אשדוד", "principal": "הרב יחזקאל כרמי", "phone": "08-8531035", "lat": 31.799324600000002, "lng": 34.6587861, "geo_src": "אחיעזר 2 אשדוד, Israel"}, {"code": "613554", "city": "אשדוד", "name": "מורשה", "stage": "יסודי", "gender": "בנים", "address": "אחיעזר 2 אשדוד", "principal": "הרב יעקב קריספין", "phone": "08-8531035", "lat": 31.7988246, "lng": 34.6587861, "geo_src": "אחיעזר 2 אשדוד, Israel"}, {"code": "613554", "city": "אשדוד", "name": "מורשה-חנ\"מ", "stage": "יסודי", "gender": "בנים", "address": "אבוחצירא 20, אשדוד", "principal": "הרב יעקב קריספין", "phone": "08-8531035", "lat": 31.7966537, "lng": 34.6597556, "geo_src": "אבוחצירא 20, אשדוד, Israel"}, {"code": "613604", "city": "אשדוד", "name": "נאות אסתר", "stage": "יסודי", "gender": "בנות", "address": "רשב''י 5 אשדוד", "principal": "גב' גילה אוחנה", "phone": "08-8648444", "lat": 31.7897896, "lng": 34.6613635, "geo_src": "רשב''י 5 אשדוד, Israel"}, {"code": "613992", "city": "אשדוד", "name": "נווה חנה/ תומר דבורה", "stage": "יסודי", "gender": "בנות", "address": "רבי ינאי 5 אשדוד", "principal": "גב' אפרת אלחרר", "phone": "08-8663446", "lat": 31.7871065, "lng": 34.6652683, "geo_src": "רבי ינאי 5 אשדוד, Israel"}, {"code": "614024", "city": "אשדוד", "name": "נחלת מאיר", "stage": "יסודי", "gender": "בנים", "address": "בן זכאי 9 אשדוד", "principal": "הרב יוסף בר ששת", "phone": "08-8665682", "lat": 31.7931199, "lng": 34.6634102, "geo_src": "בן זכאי 9 אשדוד, Israel"}, {"code": "614024", "city": "אשדוד", "name": "אבן ישראל", "stage": "יסודי", "gender": "בנים", "address": "בן זכאי 9 אשדוד", "principal": "הרב מאיר בן זקן", "phone": "08-6618138", "lat": 31.7927449, "lng": 34.66362670635095, "geo_src": "בן זכאי 9 אשדוד, Israel"}, {"code": "610949", "city": "אשדוד", "name": "דרכי פנינה", "stage": "יסודי", "gender": "בנות", "address": "בן זכאי 9 אשדוד", "principal": "גב' תהילה מוגמי", "phone": "08-8665682", "lat": 31.7927449, "lng": 34.663193693649056, "geo_src": "בן זכאי 9 אשדוד, Israel"}, {"code": "610949", "city": "אשדוד", "name": "חיי שרה/אבן ישראל", "stage": "יסודי", "gender": "בנות", "address": "ברנר 15, אשדוד", "principal": "הגב' יעל עזרא", "phone": "08-6520196", "lat": 31.7977312, "lng": 34.6512344, "geo_src": "ברנר 15, אשדוד, Israel"}, {"code": "771626", "city": "אשדוד", "name": "שירת הדסה", "stage": "תיכון", "gender": "בנות", "address": "ברנר 15, אשדוד", "principal": "גב' שולמית שם טוב", "phone": "08-8541994", "lat": 31.7972312, "lng": 34.6512344, "geo_src": "ברנר 15, אשדוד, Israel"}, {"code": "640938", "city": "אשקלון", "name": "תיכון מעיין חיים ושלום", "stage": "תיכון", "gender": "בנות", "address": "אבימלך 39, אשקלון", "principal": "גב' אמונה דיאמנט", "phone": "08-6722820", "lat": 31.6543998, "lng": 34.5804345, "geo_src": "אבימלך 39, אשקלון, Israel"}, {"code": "614420", "city": "אשקלון", "name": "מעיין חיים ושלום-עירוני", "stage": "יסודי", "gender": "בנות", "address": "אבימלך 1 אשקלון", "principal": "גב' חגית גבאי", "phone": "08-6759313", "lat": 31.653197900000002, "lng": 34.5817391, "geo_src": "אבימלך 1 אשקלון, Israel"}, {"code": "614420", "city": "אשקלון", "name": "מעייןחיים ושלום-תורני", "stage": "יסודי", "gender": "בנות", "address": "אבימלך 1 אשקלון", "principal": "גב' שיינדי ויזל", "phone": "08-6727272", "lat": 31.6526979, "lng": 34.5817391, "geo_src": "אבימלך 1 אשקלון, Israel"}, {"code": "614230", "city": "אשקלון", "name": "מעיין חיים ושלום -בנים", "stage": "יסודי", "gender": "בנים", "address": "לכיש 9 אשקלון", "principal": "הרב מאיר זיו שלום", "phone": "08-6717790", "lat": 31.6673463, "lng": 34.5803084, "geo_src": "לכיש 9 אשקלון, Israel"}, {"code": "615260", "city": "באר שבע", "name": "אוצר החיים", "stage": "יסודי", "gender": "בנות", "address": "יעקב דורי 27 באר שבע", "principal": "גב' עליזה ביטון", "phone": "08-6105855", "lat": 31.267775200000003, "lng": 34.7843755, "geo_src": "יעקב דורי 27 באר שבע, Israel"}, {"code": "613695", "city": "באר שבע", "name": "אוצר החיים", "stage": "יסודי", "gender": "בנים", "address": "האסיים 11, באר שבע", "principal": "הרב יצחק קמחי", "phone": "08-6494704", "lat": 31.245994200000002, "lng": 34.7925181, "geo_src": "באר שבע, Israel"}, {"code": "614149", "city": "באר שבע", "name": "בנות חיל", "stage": "יסודי", "gender": "בנות", "address": "יעקב דורי 27 באר שבע", "principal": "גב' אורלי עומסי", "phone": "08-6430289", "lat": 31.2672752, "lng": 34.7843755, "geo_src": "יעקב דורי 27 באר שבע, Israel"}, {"code": "615161", "city": "באר שבע", "name": "חניכי התורה", "stage": "יסודי", "gender": "בנים", "address": "רבי טרפון 5 באר שבע.", "principal": "הרב ראובן בן שלמה", "phone": "08-6498844", "lat": 31.2587946, "lng": 34.7928602, "geo_src": "רבי טרפון 5 באר שבע., Israel"}, {"code": "615161", "city": "באר שבע", "name": "משכן מאיר", "stage": "יסודי", "gender": "בנים", "address": "סמטת רבי טרפון 5 באר שבע.", "principal": "הרב מאיר שרת", "phone": "08-6498844", "lat": 31.2454942, "lng": 34.7925181, "geo_src": "באר שבע, Israel"}, {"code": "214403", "city": "בית שאן", "name": "חסד ורחמים", "stage": "יסודי", "gender": "בנים", "address": "עובדיה 5, בית שאן", "principal": "הרב שמעון נגר", "phone": "04-6060143", "lat": 32.4967519, "lng": 35.4973022, "geo_src": "בית שאן, Israel"}, {"code": "214403", "city": "בית שאן", "name": "חסד ורחמים", "stage": "יסודי", "gender": "בנות", "address": "אחד העם 3, בית שאן", "principal": "הרב שמעון נגר", "phone": "04-6060143", "lat": 32.4932152, "lng": 35.4977155, "geo_src": "אחד העם 3, בית שאן, Israel"}, {"code": "499731", "city": "בית שמש", "name": "אורחות אמותינו/ ב\"י בנות מלכה", "stage": "יסודי", "gender": "בנות", "address": "רח' האחים 3 פינת רועי קליין 1. בית שמש", "principal": "גב' חנה גינזבורג", "phone": "02-5718943", "lat": 31.746464, "lng": 34.9886825, "geo_src": "בית שמש, Israel"}, {"code": "772228", "city": "בית שמש", "name": "ברכת יצחק", "stage": "יסודי", "gender": "בנים", "address": "רבינא 4, בית שמש", "principal": "הרב שמואל ויצמן", "phone": "02-3132145", "lat": 31.7043896, "lng": 34.9723425, "geo_src": "רבינא 4, בית שמש, Israel"}, {"code": "430223", "city": "בית שמש", "name": "בדרך אבותינו - תורת משה", "stage": "יסודי", "gender": "בנים", "address": "נחל שחם 2 רמת בית שמש א'", "principal": "הרב שמואל איידנסון", "phone": "02-6334477", "lat": 31.7130298, "lng": 34.9899355, "geo_src": "נחל שחם 2 רמת בית שמש א', Israel"}, {"code": "755157", "city": "בית שמש", "name": "בית השם נהלך", "stage": "תיכון", "gender": "בנים", "address": "אצל 1, בית שמש", "principal": "הרב אוריאל בן צור", "phone": "02-6643444", "lat": 31.746291254248593, "lng": 34.98892026412908, "geo_src": "בית שמש, Israel"}, {"code": "511402", "city": "בית שמש", "name": "בית יעקב - עוז והדר", "stage": "יסודי", "gender": "בנות", "address": "נחל ערוגות 13, בית שמש", "principal": "גב' רבקה אדמוני", "phone": "02-5381242", "lat": 31.7175983, "lng": 34.9856563, "geo_src": "נחל ערוגות 13, בית שמש, Israel"}, {"code": "273086", "city": "בית שמש", "name": "בית יעקב רמב\"ש", "stage": "יסודי", "gender": "בנות", "address": "בן עזאי 12 בית שמש", "principal": "גב' רחל ארלנגר", "phone": "02-9923185", "lat": 31.7378144, "lng": 34.9989208, "geo_src": "בן עזאי 12 בית שמש, Israel"}, {"code": "511469", "city": "בית שמש", "name": "בנות הדסה", "stage": "יסודי", "gender": "בנות", "address": "האדמו\"ר משטפנשט 5, בית שמש", "principal": "גב' הדר דוד", "phone": "02-9916330/6", "lat": 31.746011745751403, "lng": 34.988829446313076, "geo_src": "בית שמש, Israel"}, {"code": "657247", "city": "בית שמש", "name": "דרך התורה חינוך ורווחה לקהילה", "stage": "יסודי", "gender": "בנים", "address": "ירמיהו הנביא 15, בית שמש", "principal": "הרב משה הורן", "phone": "02-5006515", "lat": 31.7033039, "lng": 34.9827527, "geo_src": "ירמיהו הנביא 15, בית שמש, Israel"}, {"code": "114397", "city": "בית שמש", "name": "חיי שרה", "stage": "יסודי", "gender": "בנות", "address": "מעשה חיא 13 נחלה ומנוחה בית שמש", "principal": "גב' עופרה סבן", "phone": "02-9918380\n02-9925192", "lat": 31.746011745751403, "lng": 34.98853555368693, "geo_src": "בית שמש, Israel"}, {"code": "114397", "city": "בית שמש", "name": "אור יעל", "stage": "יסודי", "gender": "בנות", "address": "ירמיהו הנביא 1, בית שמש", "principal": "גב' עופרה סבן", "phone": "02-6207966", "lat": 31.702259, "lng": 34.9842581, "geo_src": "ירמיהו הנביא 1, בית שמש, Israel"}, {"code": "136010", "city": "בית שמש", "name": "חניכי הישיבות", "stage": "יסודי", "gender": "בנים", "address": "רבי יהושוע 22 בית שמש", "principal": "הרב פנחס אביטן", "phone": "02-9991423", "lat": 31.7306249, "lng": 34.9943075, "geo_src": "רבי יהושוע 22 בית שמש, Israel"}, {"code": "675298", "city": "בית שמש", "name": "חשקת התורה", "stage": "יסודי", "gender": "בנים", "address": "בן ציון אבא שאול 10, בית שמש", "principal": "הרב שמחה גרינצייג", "phone": "02-5023344", "lat": 31.7478076, "lng": 35.0001167, "geo_src": "בן ציון אבא שאול 10, בית שמש, Israel"}, {"code": "160424", "city": "בית שמש", "name": "מגן אבות", "stage": "יסודי", "gender": "בנים", "address": "בעל הנס 2, בית שמש", "principal": "הרב דניאל סיימון", "phone": "02-9999543", "lat": 31.7256037, "lng": 34.9939405, "geo_src": "בעל הנס 2, בית שמש, Israel"}, {"code": "124057", "city": "בית שמש", "name": "מגן אבות", "stage": "יסודי", "gender": "בנות", "address": "נהר הירדן 58, בית שמש", "principal": "גב' דבורה סיימון", "phone": "02-9999544", "lat": 31.7284717, "lng": 34.9933967, "geo_src": "נהר הירדן 58, בית שמש, Israel"}, {"code": "745471", "city": "בית שמש", "name": "נתיב התורה (מאור לציון)", "stage": "יסודי", "gender": "בנים", "address": "ירמיהו 15, בית שמש", "principal": "הרב איתמר בלסן", "phone": "02-6224411", "lat": 31.7028039, "lng": 34.9827527, "geo_src": "ירמיהו 15, בית שמש, Israel"}, {"code": "743468", "city": "בית שמש", "name": "קהילות יעקב", "stage": "יסודי", "gender": "בנים", "address": "חגי 3, רמה בית שמש ג'", "principal": "הרב אמיר הוקס", "phone": "02-9995030", "lat": 31.746291254248593, "lng": 34.98844473587093, "geo_src": "בית שמש, Israel"}, {"code": "124040", "city": "בית שמש", "name": "תורה לשמה", "stage": "יסודי", "gender": "בנים", "address": "שדרות בן זאב 5 בית שמש", "principal": "הרב אברהם טולדנו", "phone": "02-9915838", "lat": 31.7424224, "lng": 34.994093, "geo_src": "שדרות בן זאב 5 בית שמש, Israel"}, {"code": "611848", "city": "בית שמש", "name": "תורת שלום", "stage": "יסודי", "gender": "בנים", "address": "הרב שלמה זלמן אוירבך 64, רמת בית שמש א'.", "principal": "הרב ישראל קוריץ", "phone": "02-9993262", "lat": 31.7067265, "lng": 34.9978289, "geo_src": "הרב שלמה זלמן אוירבך 64, רמת בית שמש א'., Israel"}, {"code": "746354", "city": "בית שמש", "name": "תפארת דוד/ חניכי הישיבות", "stage": "יסודי", "gender": "בנים", "address": "מרים הנביאה 31 בית שמש", "principal": "הרב אשר מלכה", "phone": "02-9991423", "lat": 31.701096, "lng": 34.9933275, "geo_src": "מרים הנביאה 31 בית שמש, Israel"}, {"code": "657759", "city": "בית שמש", "name": "בנות מלך", "stage": "יסודי", "gender": "בנות", "address": "אביי 21, בית שמש", "principal": "גב' מאטי רוזנבוים", "phone": "02-6500808", "lat": 31.7073269, "lng": 34.9709989, "geo_src": "אביי 21, בית שמש, Israel"}, {"code": "652651", "city": "בית שמש", "name": "בית יעקב חסידי באידיש", "stage": "יסודי", "gender": "בנות", "address": "בן עזאי 14, בית שמש", "principal": "גב' חיה חנון", "phone": "02-5354643", "lat": 31.7373144, "lng": 34.9989208, "geo_src": "בן עזאי 14, בית שמש, Israel"}, {"code": "160283", "city": "ביתר עילית", "name": "בית יעקב החסידי גבעה A", "stage": "יסודי", "gender": "בנות", "address": "ברסלב 8, חב\"ד 21, ביתר עילית", "principal": "גב' צירה הולצמן", "phone": "02-58087400 שלוחה 3", "lat": 31.7165654, "lng": 35.120091, "geo_src": "ביתר עילית, Israel"}, {"code": "343988", "city": "ביתר עילית", "name": "בית יעקב החסידי גבעה B", "stage": "יסודי", "gender": "בנות", "address": "חב\"ד 21, ביתר עילית", "principal": "הרב חיים גנזל", "phone": "02-58087400\nשלוחה 3", "lat": 31.716556881456572, "lng": 35.12015570476128, "geo_src": "ביתר עילית, Israel"}, {"code": "113514", "city": "ביתר עילית", "name": "בית מרגלית/ חיי שרה", "stage": "יסודי", "gender": "בנות", "address": "אדמורי ויזניץ 29, ביתר עילית", "principal": "גב' יפה בראל", "phone": "02-5807358", "lat": 31.716531906350944, "lng": 35.120216, "geo_src": "ביתר עילית, Israel"}, {"code": "759191", "city": "ביתר עילית", "name": "ברסלב בוגרי הישיבות", "stage": "יסודי", "gender": "בנים", "address": "אדמורי ויזניץ, ביתר עלית", "principal": "הרב יהודה קליין", "phone": "02-5851122", "lat": 31.716492176695297, "lng": 35.1202677766953, "geo_src": "ביתר עילית, Israel"}, {"code": "359190", "city": "ביתר עילית", "name": "בדרך אמותינו", "stage": "יסודי", "gender": "בנות", "address": "חב\"ד 23, ביתר עילית", "principal": "גב' מרים פיליפ", "phone": "02-5808579", "lat": 31.7164404, "lng": 35.12030750635095, "geo_src": "ביתר עילית, Israel"}, {"code": "176792", "city": "ביתר עילית", "name": "דרכי אבות צאנז", "stage": "יסודי", "gender": "בנים", "address": "דברי חיים 11, ביתר עילית", "principal": "הרב משה אהרון שלזינגר", "phone": "02-5802150", "lat": 31.716380104761274, "lng": 35.12033248145657, "geo_src": "ביתר עילית, Israel"}, {"code": "359208", "city": "ביתר עילית", "name": "דרכי איש", "stage": "יסודי", "gender": "בנים", "address": "אריאלי 1, ביתר", "principal": "הרב נחום פומרנץ", "phone": "02-5725725", "lat": 31.7163154, "lng": 35.120341, "geo_src": "ביתר עילית, Israel"}, {"code": "164186", "city": "ביתר עילית", "name": "דרכי בינה", "stage": "יסודי", "gender": "בנות", "address": "ברסלב 4, ביתר", "principal": "גב' יעל בר ששת", "phone": "02-5808695", "lat": 31.716250695238724, "lng": 35.12033248145657, "geo_src": "ביתר עילית, Israel"}, {"code": "229617", "city": "ביתר עילית", "name": "חיידר אידיש חב\"ד (אוהלי מנחם)", "stage": "יסודי", "gender": "בנים", "address": "חב\"ד 2, ביתר", "principal": "הרב מנדי כהן", "phone": "02-5800654", "lat": 31.7161904, "lng": 35.12030750635095, "geo_src": "ביתר עילית, Israel"}, {"code": "114306", "city": "ביתר עילית", "name": "חניכי הישיבות", "stage": "יסודי", "gender": "בנים", "address": "יוסף קארו 2 ביתר", "principal": "הרב דוד בר ששת", "phone": "02-5806227", "lat": 31.7161386233047, "lng": 35.1202677766953, "geo_src": "ביתר עילית, Israel"}, {"code": "363135", "city": "ביתר עילית", "name": "חפץ חיים", "stage": "יסודי", "gender": "בנות", "address": "קדושת הלוי 59, ביתר עילית", "principal": "גב' לאה ישראל", "phone": "02-5725573", "lat": 31.716098893649054, "lng": 35.120216, "geo_src": "ביתר עילית, Israel"}, {"code": "227108", "city": "ביתר עילית", "name": "יחי ראובן", "stage": "יסודי", "gender": "בנים", "address": "ברנדר 3, ביתר עילית", "principal": "הרב בן ציון בקר", "phone": "5808996", "lat": 31.716073918543426, "lng": 35.12015570476128, "geo_src": "ביתר עילית, Israel"}, {"code": "164673", "city": "ביתר עילית", "name": "כתב סופר/ ערלוי", "stage": "יסודי", "gender": "בנים", "address": "התעוררות תשובה 2, ביתר", "principal": "הרב אהרון אבלס", "phone": "02-5808260", "lat": 31.716065399999998, "lng": 35.120091, "geo_src": "ביתר עילית, Israel"}, {"code": "499889", "city": "ביתר עילית", "name": "מורשת רחל", "stage": "יסודי", "gender": "בנות", "address": "כנסת מרדכי 2, ביתר", "principal": "גב' חסיה בריזל", "phone": "02-5808054", "lat": 31.716073918543426, "lng": 35.12002629523872, "geo_src": "ביתר עילית, Israel"}, {"code": "430413", "city": "ביתר עילית", "name": "מעשי הגדולים / מעשה חייא", "stage": "יסודי", "gender": "בנים", "address": "קדושת לוי 99, ביתר", "principal": "הרב יוסף אקשטיין", "phone": "02-5807903", "lat": 31.716098893649054, "lng": 35.119966000000005, "geo_src": "ביתר עילית, Israel"}, {"code": "124099", "city": "ביתר עילית", "name": "משנת יהודה", "stage": "יסודי", "gender": "בנים", "address": "ר' עקיבא 27 ביתר", "principal": "הרב דן אריה", "phone": "02-5807369", "lat": 31.7161386233047, "lng": 35.119914223304704, "geo_src": "ביתר עילית, Israel"}, {"code": "430215", "city": "ביתר עילית", "name": "נחלת יעקב - באיאן", "stage": "יסודי", "gender": "בנים", "address": "האדמור מרוזין 26, ביתר עלית / חב\"ד פינת הרב מוצפי, גבעה B, ביתר עילית", "principal": "הרב שבח שוורץ", "phone": "02-5807407", "lat": 31.7161904, "lng": 35.11987449364906, "geo_src": "ביתר עילית, Israel"}, {"code": "660829", "city": "ביתר עילית", "name": "נחלת יעקב תפארת ישראל", "stage": "יסודי", "gender": "בנים", "address": "אדמורי ויז'ניץ 19, ביתר עילית", "principal": "הרב יהושע אליקים שוורץ", "phone": "02-6505158", "lat": 31.716250695238724, "lng": 35.11984951854343, "geo_src": "ביתר עילית, Israel"}, {"code": "163022", "city": "ביתר עילית", "name": "נתיבות שלום", "stage": "יסודי", "gender": "בנים", "address": "בנין דוד 3, ביתר עלית", "principal": "הרב אברהם אורן", "phone": "02-5808241", "lat": 31.7163154, "lng": 35.119841, "geo_src": "ביתר עילית, Israel"}, {"code": "442616", "city": "ביתר עילית", "name": "נתיבות שלום", "stage": "יסודי", "gender": "בנות", "address": "אוהב ישראל 24, ביתר עילית", "principal": "גב' מלכי בן יעקב", "phone": "02-6220766", "lat": 31.716380104761274, "lng": 35.11984951854343, "geo_src": "ביתר עילית, Israel"}, {"code": "430124", "city": "ביתר עילית", "name": "עטרת חיה מושקא-בנות-חב\"ד", "stage": "יסודי", "gender": "בנות", "address": "אוהב ישראל 20, ביתר עילית", "principal": "גב' נחמה שחר", "phone": "02-5805483", "lat": 31.7164404, "lng": 35.11987449364906, "geo_src": "ביתר עילית, Israel"}, {"code": "729426", "city": "ביתר עילית", "name": "ראשית חכמה", "stage": "יסודי", "gender": "בנות", "address": "אוהב ישראל 24 קומה -1 ביתר עילית", "principal": "גב' יהודית הרשלר", "phone": "02-5807917", "lat": 31.716492176695297, "lng": 35.119914223304704, "geo_src": "ביתר עילית, Israel"}, {"code": "632323", "city": "ביתר עילית", "name": "תורת חיים", "stage": "יסודי", "gender": "בנים", "address": "הרב בנדר 10, ביתר עילית", "principal": "הרב אפרים ישראל", "phone": "02-6571313", "lat": 31.716531906350944, "lng": 35.119966000000005, "geo_src": "ביתר עילית, Israel"}, {"code": "199752", "city": "ביתר עילית", "name": "תורת חסד", "stage": "יסודי", "gender": "בנים", "address": "אם הבנים 9, ביתר עלית", "principal": "הרב משה ארוש", "phone": "02-5802177", "lat": 31.716556881456572, "lng": 35.12002629523872, "geo_src": "ביתר עילית, Israel"}, {"code": "514570", "city": "בני ברק", "name": "אהלי אברהם", "stage": "יסודי", "gender": "בנים", "address": "אביעד 5 בני ברק", "principal": "הרב אהרון אוחנה", "phone": "03-5799586", "lat": 32.0991096, "lng": 34.8441089, "geo_src": "אביעד 5 בני ברק, Israel"}, {"code": "514349", "city": "בני ברק", "name": "אוצר החיים", "stage": "יסודי", "gender": "בנות", "address": "המכבים 68, בני ברק", "principal": "גב' מירה יאיר", "phone": "03-6199917", "lat": 32.0949838, "lng": 34.8334874, "geo_src": "המכבים 68, בני ברק, Israel"}, {"code": "514109", "city": "בני ברק", "name": "אור דוד", "stage": "יסודי", "gender": "בנות", "address": "אבוחצירא 39, בני ברק", "principal": "גב' יעל מזוז", "phone": "03-5793750", "lat": 32.0947131, "lng": 34.8311694, "geo_src": "אבוחצירא 39, בני ברק, Israel"}, {"code": "514109", "city": "בני ברק", "name": "אור דוד", "stage": "יסודי", "gender": "בנים", "address": "אבוחצירא 32, פרדס כץ בני ברק", "principal": "גב' יעל מזוז", "phone": "03-5793750", "lat": 32.0876399, "lng": 34.8324376, "geo_src": "בני ברק, Israel"}, {"code": "514562", "city": "בני ברק", "name": "איש מצליח", "stage": "יסודי", "gender": "בנים", "address": "בן זומא 21, בני ברק (פינת הרב פארדו)", "principal": "הרב אליהו קבלן", "phone": "03-6190541", "lat": 32.0872649, "lng": 34.832654106350944, "geo_src": "בני ברק, Israel"}, {"code": "513796", "city": "בני ברק", "name": "דרכי אבות / דרכי חיים צאנז", "stage": "יסודי", "gender": "בנים", "address": "גיבורי ישראל 16 בני ברק", "principal": "הרב יחזקאל שר", "phone": "03-6776632 שלוחה /3", "lat": 32.0818968, "lng": 34.8431268, "geo_src": "גיבורי ישראל 16 בני ברק, Israel"}, {"code": "514471", "city": "בני ברק", "name": "ותתפלל חנה", "stage": "יסודי", "gender": "בנות", "address": "אורליאן 27, בני ברק", "principal": "גב' חיה מעודד", "phone": "03-5743565", "lat": 32.0706264, "lng": 34.8406934, "geo_src": "אורליאן 27, בני ברק, Israel"}, {"code": "511253", "city": "בני ברק", "name": "פנינת בית יעקב", "stage": "יסודי", "gender": "בנות", "address": "רבי עקיבא 34 בניברק", "principal": "גב' איטה וייס", "phone": "03-5707963", "lat": 32.0872649, "lng": 34.83222109364905, "geo_src": "בני ברק, Israel"}, {"code": "514281", "city": "בני ברק", "name": "פרי חדש", "stage": "יסודי", "gender": "בנים", "address": "חזון איש 78, בני ברק", "principal": "הרב יונתן אלישע", "phone": "03-5746743", "lat": 32.0739428, "lng": 34.8331715, "geo_src": "חזון איש 78, בני ברק, Israel"}, {"code": "513937", "city": "בני ברק", "name": "תפארת מרדכי נדבורנה", "stage": "יסודי", "gender": "בנים", "address": "עזרא 72 בני ברק", "principal": "הרב שלמה שוהם", "phone": "03-5780034", "lat": 32.077821, "lng": 34.8371372, "geo_src": "עזרא 72 בני ברק, Israel"}, {"code": "729236", "city": "בני ברק", "name": "תפארת שרה", "stage": "יסודי", "gender": "בנות", "address": "אביעד 5 בני ברק", "principal": "גב' מרים דואני", "phone": "03-6337593/4", "lat": 32.098609599999996, "lng": 34.8441089, "geo_src": "אביעד 5 בני ברק, Israel"}, {"code": "514174", "city": "בת ים", "name": "ישמח ישראל (לשעבר בני ציון)", "stage": "יסודי", "gender": "בנים", "address": "בר אילן 75 בת ים", "principal": "הרב יהונתן ברדה", "phone": "03-5524462", "lat": 32.0114646, "lng": 34.744845, "geo_src": "בר אילן 75 בת ים, Israel"}, {"code": "514927", "city": "בת ים", "name": "האיש משה", "stage": "יסודי", "gender": "בנים", "address": "הגיבורים 33 בת ים", "principal": "הרב שי אלימלך", "phone": "03-6594759", "lat": 32.0309853, "lng": 34.7581436, "geo_src": "הגיבורים 33 בת ים, Israel"}, {"code": "514901", "city": "בת ים", "name": "ישועות יעקב", "stage": "יסודי", "gender": "בנות", "address": "סמטת הכרמל 6, בת ים", "principal": "גב' רחל עטיה", "phone": "03-5531253", "lat": 32.0154565, "lng": 34.7505283, "geo_src": "בת ים, Israel"}, {"code": "514224", "city": "בת ים", "name": "ישועות יעקב", "stage": "יסודי", "gender": "בנים", "address": "הנרייטה סולד 11,  בת ים", "principal": "הרב אברהם ישעיהו סויסה", "phone": "03-5513520", "lat": 32.0166917, "lng": 34.760546, "geo_src": "הנרייטה סולד 11, בת ים, Israel"}, {"code": "514505", "city": "בת ים", "name": "נתיבות רבקה", "stage": "יסודי", "gender": "בנות", "address": "המעפילים 1 בת ים", "principal": "גב' חגית ירחי", "phone": "03-6124260", "lat": 32.0260321, "lng": 34.7559195, "geo_src": "המעפילים 1 בת ים, Israel"}, {"code": "655258", "city": "גבעת זאב", "name": "בני הישיבות", "stage": "יסודי", "gender": "בנים", "address": "האתרוג 1, גבעת זאב", "principal": "הרב אליה משה סויסה", "phone": "02-5809897", "lat": 31.8260249, "lng": 35.2606499, "geo_src": "גבעת זאב, Israel"}, {"code": "132290", "city": "גני מודיעין", "name": "נוות יעקב אור סיני", "stage": "יסודי", "gender": "בנות", "address": "שתילי זיתים (מגרש ג') גני מודיעין", "principal": "גב' רבקה המר", "phone": "08-6634002", "lat": 31.9335111, "lng": 34.8961049, "geo_src": "גני מודיעין, Israel"}, {"code": "613679", "city": "דימונה", "name": "ניצני הנגב", "stage": "יסודי", "gender": "בנים", "address": "שד' הנשיא 35 דימונה", "principal": "הרב עמוס סופר", "phone": "08-6558788", "lat": 31.068911200000002, "lng": 35.0366482, "geo_src": "דימונה, Israel"}, {"code": "614982", "city": "דימונה", "name": "שלהבת הדרום", "stage": "יסודי", "gender": "בנות", "address": "שד' הנשיא 35 דימונה", "principal": "גב' שמעונה פרץ", "phone": "08-6558788", "lat": 31.0684112, "lng": 35.0366482, "geo_src": "דימונה, Israel"}, {"code": "630897", "city": "הוד השרון", "name": "משיבת נפש", "stage": "יסודי", "gender": "בנים", "address": "מעייני 7, הוד השרון", "principal": "הרב הושע איינהורן", "phone": "09-8359151", "lat": 32.1606211, "lng": 34.9053938, "geo_src": "מעייני 7, הוד השרון, Israel"}, {"code": "630897", "city": "הוד השרון", "name": "משיבת נפש", "stage": "יסודי", "gender": "בנות", "address": "גולומב 4, הוד השרון", "principal": "הרב הושע איינהורן", "phone": "053-4125052", "lat": 32.1559246, "lng": 34.9147213, "geo_src": "גולומב 4, הוד השרון, Israel"}, {"code": "417139", "city": "הוד השרון", "name": "רמות/נווה משה/רשב\"י", "stage": "יסודי", "gender": "בנות", "address": "קבוץ גלויות 8, הוד השרון", "principal": "הגב' הדס גדעוני", "phone": "09-7656323", "lat": 32.156447400000005, "lng": 34.8930354, "geo_src": "הוד השרון, Israel"}, {"code": "417139", "city": "הוד השרון", "name": "רמות/נווה משה/רשב\"י", "stage": "יסודי", "gender": "בנים", "address": "קבוץ גלויות 8, הוד השרון", "principal": "הגב' הדס גדעוני", "phone": "09-7656323", "lat": 32.1559474, "lng": 34.8930354, "geo_src": "הוד השרון, Israel"}, {"code": "749028", "city": "זמרת", "name": "אוהל משה", "stage": "תיכון", "gender": "בנות", "address": "מושב זמרת", "principal": "גב' טובה גמליאל", "phone": "08-9184065", "lat": 32.4893868, "lng": 35.5005074, "geo_src": "זמרת, Israel"}, {"code": "731943", "city": "חדרה", "name": "בני יששכר", "stage": "יסודי", "gender": "בנים", "address": "ארלוזרוב 30, חדרה", "principal": "הרב יצחק לנדסמן", "phone": "04-6306086", "lat": 32.440992, "lng": 34.9401053, "geo_src": "חדרה, Israel"}, {"code": "731943", "city": "חדרה", "name": "הליכות שרה", "stage": "יסודי", "gender": "בנות", "address": "ארלוזרוב 30, חדרה", "principal": "הגב' רבקה עשורי", "phone": "04-8106728", "lat": 32.440742, "lng": 34.9403553, "geo_src": "חדרה, Israel"}, {"code": "352716", "city": "חדרה", "name": "חפץ חיים", "stage": "יסודי", "gender": "בנים", "address": "רח' תרמ\"ב 2, חדרה", "principal": "הרב אברהם גבאי", "phone": "04-6218410", "lat": 32.440492, "lng": 34.9401053, "geo_src": "חדרה, Israel"}, {"code": "455170", "city": "חדרה", "name": "להורות נתן", "stage": "יסודי", "gender": "בנים", "address": "בוטוקוסקי 1, חדרה", "principal": "הרב אלעד יעקב", "phone": "077-4421508", "lat": 32.440742, "lng": 34.9398553, "geo_src": "חדרה, Israel"}, {"code": "312876", "city": "חדרה", "name": "תהילה", "stage": "יסודי", "gender": "בנות", "address": "החצב 19, גבעת אולגה, חדרה", "principal": "גב' שפרה קדוש", "phone": "04-6345669", "lat": 32.435333, "lng": 34.8793364, "geo_src": "החצב 19, גבעת אולגה, חדרה, Israel"}, {"code": "514653", "city": "חולון", "name": "בית יוסף", "stage": "יסודי", "gender": "בנים", "address": "חזית חמש 10, חולון", "principal": "הרב יוסף אלנתנוב", "phone": "03-5013131/9392 / 03-5037401", "lat": 32.027825, "lng": 34.7621813, "geo_src": "חזית חמש 10, חולון, Israel"}, {"code": "676221", "city": "חולון", "name": "בנות יעל החדש", "stage": "יסודי", "gender": "בנות", "address": "קדושי קהיר 14, חולון", "principal": "גב' ענבר זדה", "phone": "03-6083090", "lat": 32.0161269, "lng": 34.7632684, "geo_src": "קדושי קהיר 14, חולון, Israel"}, {"code": "514422", "city": "חולון", "name": "יהלום / בנות ציון", "stage": "יסודי", "gender": "בנות", "address": "נחמיה 13, חולון", "principal": "גב' חיה כהן", "phone": "03-5015587", "lat": 32.0157746, "lng": 34.7970908, "geo_src": "נחמיה 13, חולון, Israel"}, {"code": "514042", "city": "חולון", "name": "מפי עוללים/ עטרת ראובן", "stage": "יסודי", "gender": "בנים", "address": "שיבת ציון 1 חולון", "principal": "הרב שמעון צדיק", "phone": "03-5054528", "lat": 32.0035968, "lng": 34.7639216, "geo_src": "שיבת ציון 1 חולון, Israel"}, {"code": "312694", "city": "חיפה", "name": "מורשת התורה", "stage": "יסודי", "gender": "בנים", "address": "יל\"ג 28, חיפה", "principal": "הרב עודד שבזי", "phone": "04-8641846", "lat": 32.8047967, "lng": 35.0040601, "geo_src": "יל\"ג 28, חיפה, Israel"}, {"code": "464222", "city": "חיפה", "name": "מוסדות חסידי בעלזא חיפה", "stage": "יסודי", "gender": "בנים", "address": "יל\"ג  5, חיפה", "principal": "הרב מרדכי שובקס", "phone": "04-8670612", "lat": 32.807233, "lng": 35.0026778, "geo_src": "יל\"ג 5, חיפה, Israel"}, {"code": "734939", "city": "חיפה", "name": "דרכי אבות צאנז", "stage": "יסודי", "gender": "בנים", "address": "הגיבורים 29 חיפה", "principal": "הרב חיים שלמה לוי", "phone": "", "lat": 32.8029059, "lng": 35.0086255, "geo_src": "הגיבורים 29 חיפה, Israel"}, {"code": "734061", "city": "חצור הגלילית", "name": "מעלות שמחה", "stage": "תיכון", "gender": "בנות", "address": "בן ציון 20, חצור הגלילית", "principal": "גב' נטע מלכה", "phone": "04-8408118", "lat": 32.9794197, "lng": 35.543327, "geo_src": "חצור הגלילית, Israel"}, {"code": "214023", "city": "חצור הגלילית", "name": "קול יהודה", "stage": "יסודי", "gender": "בנים", "address": "בן ציון 20, חצור", "principal": "הרב אביחי דדון", "phone": "04-6930084", "lat": 32.9790447, "lng": 35.54354350635094, "geo_src": "חצור הגלילית, Israel"}, {"code": "214023", "city": "חצור הגלילית", "name": "קול יהודה", "stage": "יסודי", "gender": "בנות", "address": "בן ציון 20, חצור", "principal": "גב' נתנאלה לחייאני", "phone": "04-6930084", "lat": 32.9790447, "lng": 35.54311049364905, "geo_src": "חצור הגלילית, Israel"}, {"code": "639617", "city": "חריש", "name": "בית יעקב חריש", "stage": "יסודי", "gender": "בנות", "address": "האלה 5, חריש", "principal": "גב' שרה שוקר", "phone": "04-9109338", "lat": 32.45989, "lng": 35.0510843, "geo_src": "חריש, Israel"}, {"code": "748731", "city": "חריש", "name": "חזון שמעון", "stage": "יסודי", "gender": "בנים", "address": "טורקיז 12 , חריש", "principal": "הרב יוסף עמר", "phone": "04-6538000", "lat": 32.4629532, "lng": 35.0452631, "geo_src": "טורקיז 12 , חריש, Israel"}, {"code": "766352", "city": "חריש", "name": "עמלי תורה חריש", "stage": "יסודי", "gender": "בנים", "address": "ההשראה 6, חריש", "principal": "הרב מתתיהו כובאני", "phone": "04-8386445", "lat": 32.45939, "lng": 35.0510843, "geo_src": "חריש, Israel"}, {"code": "766352", "city": "חריש", "name": "עמלי תורה חריש", "stage": "יסודי", "gender": "בנות", "address": "אלה 5, חריש", "principal": "גב' חדוה שטרית", "phone": "", "lat": 32.4645487, "lng": 35.0387759, "geo_src": "אלה 5, חריש, Israel"}, {"code": "765719", "city": "טבריה", "name": "עמלי תורה פוריה", "stage": "יסודי", "gender": "בנים", "address": "דרך מר\"ן 5, טבריה", "principal": "הרב אריאל עובדיה", "phone": "04-6347177", "lat": 32.7823376, "lng": 35.5041339, "geo_src": "דרך מר\"ן 5, טבריה, Israel"}, {"code": "765719", "city": "טבריה", "name": "עמלי תורה פוריה", "stage": "יסודי", "gender": "בנות", "address": "דרך מר\"ן 5, טבריה", "principal": "גב' אודליה עובדיה", "phone": "04-6347177", "lat": 32.781837599999996, "lng": 35.5041339, "geo_src": "דרך מר\"ן 5, טבריה, Israel"}, {"code": "214049", "city": "טבריה", "name": "בת מלך", "stage": "יסודי", "gender": "בנות", "address": "מודיעין 14, טבריה", "principal": "גב' רחל ביטון", "phone": "04-6792435", "lat": 32.7963, "lng": 35.5342516, "geo_src": "מודיעין 14, טבריה, Israel"}, {"code": "756510", "city": "טבריה", "name": "בנות צאנז", "stage": "יסודי", "gender": "בנות", "address": "רח' שפע חיים 13, טבריה", "principal": "גב' חנה גולדה כהנא", "phone": "04-8873696", "lat": 32.794102200000005, "lng": 35.5328566, "geo_src": "טבריה, Israel"}, {"code": "756502", "city": "טבריה", "name": "דרכי אבות צאנז", "stage": "יסודי", "gender": "בנים", "address": "רח' שפע חיים 14, טבריה", "principal": "הרב משה אהרון כהנא", "phone": "04-6159258", "lat": 32.7936022, "lng": 35.5328566, "geo_src": "טבריה, Israel"}, {"code": "213181", "city": "טבריה", "name": "תפארת בית יעקב", "stage": "יסודי", "gender": "בנות", "address": "המגינים 54 טבריה", "principal": "גב' לאה שניטר-פלר", "phone": "04-6722207", "lat": 32.7931366, "lng": 35.537424, "geo_src": "המגינים 54 טבריה, Israel"}, {"code": "214148", "city": "טבריה", "name": "תפארת טבריה", "stage": "יסודי", "gender": "בנים", "address": "כרכום 1 טבריה", "principal": "הרב בנימין בוימל", "phone": "04-6656015", "lat": 32.7832307, "lng": 35.5312069, "geo_src": "כרכום 1 טבריה, Israel"}, {"code": "214361", "city": "יבניאל", "name": "בית פייגא", "stage": "יסודי", "gender": "בנות", "address": "החיים 2 יבניאל", "principal": "גב' רויטל גרמה", "phone": "04-6708441", "lat": 32.7157177, "lng": 35.5355109, "geo_src": "יבניאל, Israel"}, {"code": "214353", "city": "יבניאל", "name": "ילדי חן", "stage": "יסודי", "gender": "בנים", "address": "החיים 1 יבניאל", "principal": "הרב גדעון מצליח", "phone": "04-6708276", "lat": 32.7153427, "lng": 35.535727406350944, "geo_src": "יבניאל, Israel"}, {"code": "675520", "city": "יבניאל", "name": "ילדי המוהרא\"ש", "stage": "יסודי", "gender": "בנים", "address": "צמרת יבנאל 1, יבניאל", "principal": "הרב אליהו מאיה", "phone": "04-8866644", "lat": 32.7153427, "lng": 35.53529439364905, "geo_src": "יבניאל, Israel"}, {"code": "742171", "city": "יבנה", "name": "אור דוד", "stage": "יסודי", "gender": "בנים", "address": "הלילך 10, יבנה", "principal": "הרב בן ציון מזוז", "phone": "08-6592165", "lat": 31.8712833, "lng": 34.7471479, "geo_src": "הלילך 10, יבנה, Israel"}, {"code": "730002", "city": "יסודות", "name": "ת\"ת החדש יסודות", "stage": "יסודי", "gender": "בנים", "address": "מושב יסודות", "principal": "הרב יהושע כהן", "phone": "08-9494650/756", "lat": 31.8149319, "lng": 34.8661654, "geo_src": "יסודות, Israel"}, {"code": "124131", "city": "ירושלים", "name": "אהבת משה", "stage": "יסודי", "gender": "בנים", "address": "ישעיהו 7, ירושלים", "principal": "הרב ניסים כלפא", "phone": "02-5021332", "lat": 31.7867142, "lng": 35.2185063, "geo_src": "ישעיהו 7, ירושלים, Israel"}, {"code": "134700", "city": "ירושלים", "name": "אור חדש", "stage": "יסודי", "gender": "בנים", "address": "חי טייב 42, הר נוף ירושלים", "principal": "הרב ארנון יגודיוב", "phone": "02-6514088 \n02-5695800", "lat": 31.7853763, "lng": 35.172378, "geo_src": "חי טייב 42, הר נוף ירושלים, Israel"}, {"code": "113944", "city": "ירושלים", "name": "אורה ברמה-אור רחל - בנות", "stage": "יסודי", "gender": "בנות", "address": "קלכהיים 17 פינת כהנמן אגרות משה ירושלים", "principal": "גב' לאה גלבוע", "phone": "02-5714159", "lat": 31.779097200000002, "lng": 35.2257856, "geo_src": "ירושלים, Israel"}, {"code": "353573", "city": "ירושלים", "name": "איילת השחר", "stage": "יסודי", "gender": "בנות", "address": "רח' בן ציון 15, ג.שאול, ירושלים", "principal": "גב' רות טובול", "phone": "02-6528537", "lat": 31.779078169883128, "lng": 35.225881270858096, "geo_src": "ירושלים, Israel"}, {"code": "440529", "city": "ירושלים", "name": "אמונת ציון", "stage": "יסודי", "gender": "בנים", "address": "אטיופיה 6, ירושלים", "principal": "הרב מרדכי שטרן", "phone": "02-6282899", "lat": 31.7844136, "lng": 35.221026, "geo_src": "אטיופיה 6, ירושלים, Israel"}, {"code": "359224", "city": "ירושלים", "name": "אמונת ציון", "stage": "יסודי", "gender": "בנות", "address": "עידו הנביא 8 ירושלים", "principal": "גב' צביה ויסבלום", "phone": "02-6282899", "lat": 31.7845514, "lng": 35.2256815, "geo_src": "עידו הנביא 8 ירושלים, Israel"}, {"code": "721563", "city": "ירושלים", "name": "אשרינו", "stage": "יסודי", "gender": "בנות", "address": "רש\"י 66, ירושלים", "principal": "גב' מיכל רדליך", "phone": "02-9930914", "lat": 31.7882018, "lng": 35.20888, "geo_src": "רש\"י 66, ירושלים, Israel"}, {"code": "521971", "city": "ירושלים", "name": "אשרינו/ מרכז העיר", "stage": "יסודי", "gender": "בנים", "address": "רש\"י 66, ירושלים", "principal": "הרב דוד אנסבכר", "phone": "052-7160271", "lat": 31.787701799999997, "lng": 35.20888, "geo_src": "רש\"י 66, ירושלים, Israel"}, {"code": "725572", "city": "ירושלים", "name": "בית אהרון וישראל / ת\"ת קרלין", "stage": "יסודי", "gender": "בנים", "address": "שלמה מוסיוף 25, ירושלים", "principal": "הרב שלום גנץ", "phone": "02-5823264", "lat": 31.7910134, "lng": 35.2207653, "geo_src": "שלמה מוסיוף 25, ירושלים, Israel"}, {"code": "112789", "city": "ירושלים", "name": "בית ברכה", "stage": "יסודי", "gender": "בנות", "address": "עובדיה 24, ירושלים", "principal": "הרב חיים יעקב קלפהולץ", "phone": "02-5007807", "lat": 31.7911931, "lng": 35.2153159, "geo_src": "עובדיה 24, ירושלים, Israel"}, {"code": "160341", "city": "ירושלים", "name": "בית יעקב באידיש", "stage": "יסודי", "gender": "בנות", "address": "סורוצקין 46, ירושלים", "principal": "הרב יחזקאל הלפרן", "phone": "02-5953030", "lat": 31.7968888, "lng": 35.2058624, "geo_src": "סורוצקין 46, ירושלים, Israel"}, {"code": "760710", "city": "ירושלים", "name": "בית יעקב החדש", "stage": "יסודי", "gender": "בנות", "address": "רח' שיבת ציון פינת שירת הים רמות א' ירושלים", "principal": "גב' עדינה בוסו", "phone": "02-6288098", "lat": 31.7790239766953, "lng": 35.2259623766953, "geo_src": "ירושלים, Israel"}, {"code": "647537", "city": "ירושלים", "name": "בית יעקב החדש", "stage": "יסודי", "gender": "בנות", "address": "בית וגן 48, בית וגן, ירושלים", "principal": "גב' יפה טוויל", "phone": "", "lat": 31.7678327, "lng": 35.1848041, "geo_src": "בית וגן 48, בית וגן, ירושלים, Israel"}, {"code": "267351", "city": "ירושלים", "name": "בית יעקב פנינת הצפון/ יוסף לקח בנות", "stage": "יסודי", "gender": "בנות", "address": "נוה יעקב 26, ירושלים", "principal": "הרב רוני עובד", "phone": "02-5836132", "lat": 31.842212, "lng": 35.24206, "geo_src": "נוה יעקב 26, ירושלים, Israel"}, {"code": "142729", "city": "ירושלים", "name": "במסילה נעלה", "stage": "יסודי", "gender": "בנים", "address": "שמעון הצדיק 23, ירושלים", "principal": "הרב יצחק אדרי", "phone": "02-5828611", "lat": 31.7937506, "lng": 35.2246553, "geo_src": "שמעון הצדיק 23, ירושלים, Israel"}, {"code": "761221", "city": "ירושלים", "name": "בנות צאנז", "stage": "יסודי", "gender": "בנות", "address": "סורוצקין 40, ירושלים", "principal": "גב' פרומט לנגסאם", "phone": "02-5378056", "lat": 31.7989334, "lng": 35.2069915, "geo_src": "סורוצקין 40, ירושלים, Israel"}, {"code": "359331", "city": "ירושלים", "name": "בנות ציון", "stage": "יסודי", "gender": "בנות", "address": "מירסקי 5 רמות ד' ירושלים", "principal": "גב' לאה נקי", "phone": "02-5866635\n02-5870493", "lat": 31.8216353, "lng": 35.1912479, "geo_src": "מירסקי 5 רמות ד' ירושלים, Israel"}, {"code": "757690", "city": "ירושלים", "name": "משך חכמה / בניין אב (ג.שאול)", "stage": "יסודי", "gender": "בנים", "address": "בן ציון 15, ג.שאול, ירושלים", "principal": "הרב יהונתן עזרא", "phone": "02-6566069", "lat": 31.778942870858092, "lng": 35.22601656988313, "geo_src": "ירושלים, Israel"}, {"code": "643734", "city": "ירושלים", "name": "משך חכמה מוסדי עולם (בית וגן)", "stage": "יסודי", "gender": "בנים", "address": "מיכלין 8, בית וגן, ירושלים", "principal": "הרב משה רביבו", "phone": "052-7180808", "lat": 31.7644569, "lng": 35.1882624, "geo_src": "מיכלין 8, בית וגן, ירושלים, Israel"}, {"code": "761312", "city": "ירושלים", "name": "חניכי הישיבות/ משך חכמה (רמות)", "stage": "יסודי", "gender": "בנים", "address": "ארי טורמן 10, רמות א', ירושלים", "principal": "הרב אהרון אלימלך", "phone": "", "lat": 31.7788472, "lng": 35.2260356, "geo_src": "ירושלים, Israel"}, {"code": "113183", "city": "ירושלים", "name": "גדולת יעקב / בפי ישרים", "stage": "יסודי", "gender": "בנים", "address": "תורה ועבודה 2, ירושלים", "principal": "הרב אלחנן גרביאן", "phone": "02-6419940", "lat": 31.7679775, "lng": 35.1825585, "geo_src": "תורה ועבודה 2, ירושלים, Israel"}, {"code": "113860", "city": "ירושלים", "name": "דברות משה", "stage": "יסודי", "gender": "בנים", "address": "ההפלאה 10 ירושלים", "principal": "הרב אריה פוקסברומר", "phone": "02-6540339", "lat": 31.77875152914191, "lng": 35.22601656988313, "geo_src": "ירושלים, Israel"}, {"code": "112722", "city": "ירושלים", "name": "דרכי אבות (צאנז)", "stage": "יסודי", "gender": "בנים", "address": "דברי חיים 2, ירושלים", "principal": "הרב נחמן אייזנבך", "phone": "02-5387340", "lat": 31.7965254, "lng": 35.2100482, "geo_src": "דברי חיים 2, ירושלים, Israel"}, {"code": "726612", "city": "ירושלים", "name": "דרכי מרדכי - (באיאן)", "stage": "יסודי", "gender": "בנים", "address": "אביגדור 3, ירושלים", "principal": "הרב שלמה סירוטה", "phone": "02-5384148", "lat": 31.7950437, "lng": 35.242626, "geo_src": "אביגדור 3, ירושלים, Israel"}, {"code": "662932", "city": "ירושלים", "name": "היכל משה (פסגת זאב)", "stage": "יסודי", "gender": "בנים", "address": "הניידות 13 פסגת זאב ירושלים", "principal": "הרב יצחק גבאי", "phone": "0587396364", "lat": 31.8260281, "lng": 35.2412576, "geo_src": "הניידות 13 פסגת זאב ירושלים, Israel"}, {"code": "757625", "city": "ירושלים", "name": "היכל משה (ג.שאול)", "stage": "יסודי", "gender": "בנים", "address": "גבעת שאול 5, ירושלים", "principal": "הרב ינון רחמני", "phone": "02-6431719", "lat": 31.7911185, "lng": 35.1931023, "geo_src": "גבעת שאול 5, ירושלים, Israel"}, {"code": "645341", "city": "ירושלים", "name": "היכל משה  (רמות)", "stage": "יסודי", "gender": "בנים", "address": "סולם יעקב 2, ירושלים", "principal": "הרב עזריאל בורוכוב", "phone": "02-6431719", "lat": 31.8190668, "lng": 35.2014734, "geo_src": "סולם יעקב 2, ירושלים, Israel"}, {"code": "633941", "city": "ירושלים", "name": "פני מנחם", "stage": "יסודי", "gender": "בנים", "address": "אלפנדרי 1, ירושלים", "principal": "הרב ישראל ענדען", "phone": "02-6638111", "lat": 31.7875478, "lng": 35.2106375, "geo_src": "אלפנדרי 1, ירושלים, Israel"}, {"code": "113126", "city": "ירושלים", "name": "המסילה", "stage": "יסודי", "gender": "בנים", "address": "מירסקי יצחק 5, רמות ד', ירושלים", "principal": "הרב מאיר אסולין", "phone": "02-5860761", "lat": 31.8212603, "lng": 35.191464406350946, "geo_src": "מירסקי יצחק 5, רמות ד', ירושלים, Israel"}, {"code": "731745", "city": "ירושלים", "name": "חזון מאיר / בית ישראל", "stage": "יסודי", "gender": "בנים", "address": "דרך משה ברעם 26, מתחם ישיבת איתרי, תלפיות, ירושלים", "principal": "הרב שמעון ואזנה", "phone": "02-9955269", "lat": 31.778670423304703, "lng": 35.2259623766953, "geo_src": "ירושלים, Israel"}, {"code": "664243", "city": "ירושלים", "name": "בית ספר גילה (עמלי תורה)", "stage": "יסודי", "gender": "בנים", "address": "יוסטמן משה2, גילה, ירושלים", "principal": "הרב משה נגר", "phone": "02-5462236", "lat": 31.778616230116874, "lng": 35.225881270858096, "geo_src": "ירושלים, Israel"}, {"code": "734616", "city": "ירושלים", "name": "חניכי הישיבות / אור חדש", "stage": "יסודי", "gender": "בנים", "address": "אפשטיין 5, קריית יובל, ירושלים", "principal": "הרב שמעון ישראל", "phone": "02-5695800", "lat": 31.7785972, "lng": 35.2257856, "geo_src": "ירושלים, Israel"}, {"code": "179770", "city": "ירושלים", "name": "יוסף ה' עליכם", "stage": "יסודי", "gender": "בנים", "address": "מזל דלי 21, ירושלים", "principal": "הרב שלמה עובד", "phone": "02-5836129", "lat": 31.8345302, "lng": 35.2336949, "geo_src": "מזל דלי 21, ירושלים, Israel"}, {"code": "757682", "city": "ירושלים", "name": "יסוד החינוך", "stage": "יסודי", "gender": "בנות", "address": "נאג'רה 12, ירושלים", "principal": "גב' אלישבע בן דוד", "phone": "02-6799757", "lat": 31.7906405, "lng": 35.1915468, "geo_src": "נאג'רה 12, ירושלים, Israel"}, {"code": "722801", "city": "ירושלים", "name": "יראת השם", "stage": "יסודי", "gender": "בנות", "address": "יעקב פת 3, ירושלים (תחנת דלק מנטה צומת פת)", "principal": "גב' אלישבע בארי", "phone": "02-5338595", "lat": 31.778616230116874, "lng": 35.22568992914191, "geo_src": "ירושלים, Israel"}, {"code": "111021", "city": "ירושלים", "name": "ירים משה", "stage": "פטור", "gender": "בנים", "address": "מלכי ישראל 36 י-ם", "principal": "הרב יהודה בלולו", "phone": "02-5380461", "lat": 31.778670423304703, "lng": 35.225608823304704, "geo_src": "ירושלים, Israel"}, {"code": "721662", "city": "ירושלים", "name": "כאייל תערוג  הר חומה", "stage": "יסודי", "gender": "בנים", "address": "חיים מרינוב 10, הר חומה, ירושלים", "principal": "הרב אלירן סומך", "phone": "02-6242801", "lat": 31.7205516, "lng": 35.2180466, "geo_src": "חיים מרינוב 10, הר חומה, ירושלים, Israel"}, {"code": "721662", "city": "ירושלים", "name": "כאייל תערוג - הר חומה", "stage": "יסודי", "gender": "בנות", "address": "חיים מרינוב 10, הר חומה, ירושלים", "principal": "הרב אלירן סומך", "phone": "02-6242801", "lat": 31.720051599999998, "lng": 35.2180466, "geo_src": "חיים מרינוב 10, הר חומה, ירושלים, Israel"}, {"code": "160382", "city": "ירושלים", "name": "לחם ביכורים", "stage": "יסודי", "gender": "בנים", "address": "אביר יעקב 1, ירושלים", "principal": "הרב יאיר כהן", "phone": "02-5831585", "lat": 31.8404836, "lng": 35.2504335, "geo_src": "אביר יעקב 1, ירושלים, Israel"}, {"code": "112896", "city": "ירושלים", "name": "למען אחי/ת\"ת שערי תורה", "stage": "יסודי", "gender": "בנים", "address": "הטורים 36, ירושלים", "principal": "הרב אפרים רזניק", "phone": "02-5322069", "lat": 31.790339, "lng": 35.2106672, "geo_src": "הטורים 36, ירושלים, Israel"}, {"code": "113290", "city": "ירושלים", "name": "מאור ישראל", "stage": "יסודי", "gender": "בנים", "address": "אור שרגא 21, רמות ד', ירושלים", "principal": "הרב אשר חזיזה", "phone": "02-9664670", "lat": 31.8253712, "lng": 35.1903141, "geo_src": "אור שרגא 21, רמות ד', ירושלים, Israel"}, {"code": "747725", "city": "ירושלים", "name": "מים חיים", "stage": "יסודי", "gender": "בנות", "address": "קצנלסון 7, ירושלים", "principal": "אמונה בן יעקב", "phone": "02-5455576", "lat": 31.7618104, "lng": 35.2032983, "geo_src": "קצנלסון 7, ירושלים, Israel"}, {"code": "747725", "city": "ירושלים", "name": "מים חיים", "stage": "יסודי", "gender": "בנים", "address": "הורקניה 26, שי עגנון 1, חוות הנוער הציונית, קטמון ירושלים", "principal": "הרב שמעון חנניה", "phone": "02-5455576", "lat": 31.77875152914191, "lng": 35.225554630116875, "geo_src": "ירושלים, Israel"}, {"code": "116129", "city": "ירושלים", "name": "מרכז תורני בני ציון", "stage": "יסודי", "gender": "בנים", "address": "מירסקי 5 רמות ד' ירושלים", "principal": "הרב משה נתניאן", "phone": "02-5866635", "lat": 31.8212603, "lng": 35.191031393649055, "geo_src": "מירסקי 5 רמות ד' ירושלים, Israel"}, {"code": "361238", "city": "ירושלים", "name": "עטרת אסתר", "stage": "יסודי", "gender": "בנות", "address": "זוין 21 נווה יעקב ירושלים", "principal": "גב' מלכה אביסרור", "phone": "02-5854799", "lat": 31.7788472, "lng": 35.2255356, "geo_src": "ירושלים, Israel"}, {"code": "174656", "city": "ירושלים", "name": "עטרת שלמה", "stage": "יסודי", "gender": "בנים", "address": "מינץ 46 רמות ד', ירושלים", "principal": "הרב אפרים אטלי", "phone": "02-6535711", "lat": 31.823754, "lng": 35.1922447, "geo_src": "מינץ 46 רמות ד', ירושלים, Israel"}, {"code": "657007", "city": "ירושלים", "name": "עטרת חיים", "stage": "יסודי", "gender": "בנים", "address": "שמואל מאור 1 , הר חומה ירושלים", "principal": "הרב חוני אטלי", "phone": "02-6242130", "lat": 31.778942870858092, "lng": 35.225554630116875, "geo_src": "ירושלים, Israel"}, {"code": "114140", "city": "ירושלים", "name": "פאר יוסף", "stage": "יסודי", "gender": "בנים", "address": "זוין 21 נווה יעקב ירושלים", "principal": "הרב רם רחמים", "phone": "02-5831817/5517", "lat": 31.7790239766953, "lng": 35.225608823304704, "geo_src": "ירושלים, Israel"}, {"code": "145466", "city": "ירושלים", "name": "ת\"ת פקודת אלעזר", "stage": "יסודי", "gender": "בנים", "address": "אהליאב 23/ אור אלחנן 8 ירושלים", "principal": "הרב שלום דונט", "phone": "02-6338751", "lat": 31.779078169883128, "lng": 35.22568992914191, "geo_src": "ירושלים, Israel"}, {"code": "134676", "city": "ירושלים", "name": "שובו בנים/נחמת ציון", "stage": "יסודי", "gender": "בנים", "address": "עידו הנביא 10, ירושלים", "principal": "הרב נתן חנניה", "phone": "02-6337777", "lat": 31.7846173, "lng": 35.2263065, "geo_src": "עידו הנביא 10, ירושלים, Israel"}, {"code": "362624", "city": "ירושלים", "name": "תולדות ניסים", "stage": "יסודי", "gender": "בנים", "address": "הרב פראנק 8, בית וגן , ירושלים.", "principal": "הרב אריאל ביג'אוי", "phone": "02-6506306", "lat": 31.7649887, "lng": 35.1838166, "geo_src": "הרב פראנק 8, בית וגן , ירושלים., Israel"}, {"code": "361527", "city": "ירושלים", "name": "תולדות ניסים", "stage": "יסודי", "gender": "בנות", "address": "הפסגה 24 בית וגן ירושלים", "principal": "גב' אושרת רבין", "phone": "050-7782892", "lat": 31.7682682, "lng": 35.1827313, "geo_src": "הפסגה 24 בית וגן ירושלים, Israel"}, {"code": "113738", "city": "ירושלים", "name": "תורה ברמה", "stage": "יסודי", "gender": "בנים", "address": "אגרות משה 25 רמת שלמה ירושלים", "principal": "הרב שלמה ברסקה", "phone": "02-5712213", "lat": 31.809778, "lng": 35.2215605, "geo_src": "אגרות משה 25 רמת שלמה ירושלים, Israel"}, {"code": "360511", "city": "ירושלים", "name": "תורת אמך / בניין אב", "stage": "פטור", "gender": "בנים", "address": "אהלי יוסף 3, ירושלים", "principal": "ר' בן ציון בקשי דורון - צבי מרדר", "phone": "02-5003408", "lat": 31.7966028, "lng": 35.216598, "geo_src": "אהלי יוסף 3, ירושלים, Israel"}, {"code": "669721", "city": "ירושלים", "name": "הם חיינו", "stage": "יסודי", "gender": "בנים", "address": "אליעזרוב 8, ירושלים", "principal": "הרב אברהם הולצר", "phone": "073-3250055", "lat": 31.7966414, "lng": 35.2177893, "geo_src": "אליעזרוב 8, ירושלים, Israel"}, {"code": "722231", "city": "ירושלים", "name": "ת\"ת החדש", "stage": "יסודי", "gender": "בנים", "address": "ירמיהו 20, ירושלים", "principal": "הרב אהרון רפאלי", "phone": "02-5306795", "lat": 31.7927674, "lng": 35.2129672, "geo_src": "ירמיהו 20, ירושלים, Israel"}, {"code": "416156", "city": "כפר יונה", "name": "פני מאיר", "stage": "יסודי", "gender": "בנים", "address": "התורמוס 168, כפר יונה", "principal": "הרב יוסף הללויה", "phone": "09-8986073", "lat": 32.314754, "lng": 34.9321169, "geo_src": "כפר יונה, Israel"}, {"code": "416156", "city": "כפר יונה", "name": "פני מאיר", "stage": "יסודי", "gender": "בנות", "address": "התורמוס 168, כפר יונה", "principal": "הרב יוסף הללויה", "phone": "09-8986073", "lat": 32.314254, "lng": 34.9321169, "geo_src": "כפר יונה, Israel"}, {"code": "758995", "city": "כפר סבא", "name": "עטרת חיים בנות", "stage": "יסודי", "gender": "בנות", "address": "יערה 10 כפר סבא", "principal": "גב' אילת טסה", "phone": "09-7481940", "lat": 32.1866453, "lng": 34.9002517, "geo_src": "יערה 10 כפר סבא, Israel"}, {"code": "413013", "city": "כפר סבא", "name": "עץ חיים", "stage": "יסודי", "gender": "בנים", "address": "יערה 10 כפר סבא", "principal": "הרב יהודה עמר", "phone": "09-7481940", "lat": 32.1861453, "lng": 34.9002517, "geo_src": "יערה 10 כפר סבא, Israel"}, {"code": "415695", "city": "לוד", "name": "בית מנחם תורני", "stage": "יסודי", "gender": "בנות", "address": "אהרון לובלין 38 גני אביב לוד", "principal": "גב' שולי הרטמן", "phone": "08-9282905", "lat": 31.961983200000002, "lng": 34.8790146, "geo_src": "אהרון לובלין 38 גני אביב לוד, Israel"}, {"code": "415695", "city": "לוד", "name": "בית מנחם תורני", "stage": "יסודי", "gender": "בנים", "address": "אהרון לובלין 38 גני אביב לוד", "principal": "גב' שולי הרטמן", "phone": "08-9282905", "lat": 31.9614832, "lng": 34.8790146, "geo_src": "אהרון לובלין 38 גני אביב לוד, Israel"}, {"code": "414946", "city": "לוד", "name": "בנות יוסף (רשב\"י)", "stage": "יסודי", "gender": "בנות", "address": "רח' הרב יורם אברג'ל 1 גני איילון, לוד", "principal": "גב' עדי קוביוף", "phone": "08-9150371", "lat": 31.949151200000003, "lng": 34.8884857, "geo_src": "לוד, Israel"}, {"code": "739037", "city": "לוד", "name": "בני יוסף", "stage": "יסודי", "gender": "בנים", "address": "רח' הרב יורם אברג'ל 4,  גני איילון, לוד", "principal": "הרב יהודה זמיר", "phone": "08-6326434", "lat": 31.9487762, "lng": 34.88870220635094, "geo_src": "לוד, Israel"}, {"code": "475723", "city": "לוד", "name": "מעוז חיים", "stage": "יסודי", "gender": "בנים", "address": "הרב עובדיה יוסף 1, לוד", "principal": "הרב יחזקאל כהן", "phone": "08-6983869", "lat": 31.9406671, "lng": 34.9013008, "geo_src": "הרב עובדיה יוסף 1, לוד, Israel"}, {"code": "788711", "city": "לוד", "name": "סוכת דוד", "stage": "יסודי", "gender": "בנים", "address": "שבט יששכר 1, לוד", "principal": "הרב יעקב בצרי", "phone": "", "lat": 31.9487762, "lng": 34.88826919364905, "geo_src": "לוד, Israel"}, {"code": "113159", "city": "מבשרת ציון", "name": "צלילי נועם", "stage": "יסודי", "gender": "בנים", "address": "הראשונים 5 מבשרת ציון", "principal": "הרב דניאל יוסף טויטו", "phone": "02-5340454", "lat": 31.8059698, "lng": 35.152731, "geo_src": "מבשרת ציון, Israel"}, {"code": "113159", "city": "מבשרת ציון", "name": "צלילי נועם", "stage": "יסודי", "gender": "בנות", "address": "הראשונים 5 מבשרת ציון", "principal": "הרב דניאל יוסף טויטו", "phone": "02-5340454", "lat": 31.805469799999997, "lng": 35.152731, "geo_src": "מבשרת ציון, Israel"}, {"code": "214254", "city": "מגדל העמק", "name": "המאוחד", "stage": "יסודי", "gender": "בנים", "address": "הרב עובדיה יוסף 1, מגדל העמק", "principal": "הרב חיים דהן", "phone": "073-2227301/2 04-6546284", "lat": 32.6768244, "lng": 35.2413237, "geo_src": "מגדל העמק, Israel"}, {"code": "214478", "city": "מגדל העמק", "name": "מחשבה", "stage": "יסודי", "gender": "בנים", "address": "זבולון 31, מגדל העמק", "principal": "הרב שמעון ריס", "phone": "073-2227060", "lat": 32.67975, "lng": 35.2319246, "geo_src": "זבולון 31, מגדל העמק, Israel"}, {"code": "214478", "city": "מגדל העמק", "name": "מחשבה", "stage": "יסודי", "gender": "בנות", "address": "זבולון 31, מגדל העמק", "principal": "הרב שמעון ריס", "phone": "073-2227060", "lat": 32.679249999999996, "lng": 35.2319246, "geo_src": "זבולון 31, מגדל העמק, Israel"}, {"code": "214031", "city": "מגדל העמק", "name": "נחליאל", "stage": "יסודי", "gender": "בנות", "address": "ניצנים 8 מגדל העמק", "principal": "גב' אריאלה מאדר", "phone": "04-6545360", "lat": 32.6845192, "lng": 35.2352222, "geo_src": "ניצנים 8 מגדל העמק, Israel"}, {"code": "214213", "city": "מגדל העמק", "name": "נר הצפון", "stage": "יסודי", "gender": "בנים", "address": "האילן 3 מגדל העמק", "principal": "הרב אושרי אזולאי", "phone": "04-6546564", "lat": 32.6764494, "lng": 35.24154020635095, "geo_src": "מגדל העמק, Israel"}, {"code": "213249", "city": "מגדל העמק", "name": "פנינת אור", "stage": "יסודי", "gender": "בנות", "address": "הרב עובדיה 42 מגדל העמק", "principal": "גב' רבקה דחבש", "phone": "073-2227278 073-2227275", "lat": 32.6764494, "lng": 35.24110719364906, "geo_src": "מגדל העמק, Israel"}, {"code": "213249", "city": "מגדל העמק", "name": "אורות בעמק", "stage": "יסודי", "gender": "בנות", "address": "אלי כהן 1, מגדל העמק", "principal": "גב' אתי בוסקילה", "phone": "073-2227278 073-2227275", "lat": 32.6747764, "lng": 35.2349854, "geo_src": "אלי כהן 1, מגדל העמק, Israel"}, {"code": "288167", "city": "מודיעין עילית", "name": "אור שערים-בית ברכה", "stage": "יסודי", "gender": "בנות", "address": "נתיבות המשפט 51, מודיעין עלית", "principal": "גב' איטה טננהויז", "phone": "073-2226992", "lat": 32.7964296, "lng": 35.5334249, "geo_src": "מודיעין עילית, Israel"}, {"code": "186387", "city": "מודיעין עילית", "name": "קרלין סטולין", "stage": "יסודי", "gender": "בנים", "address": "ריטב\"א 2, מודיעין עלית", "principal": "הרב עמרם בריזל", "phone": "073-2226999", "lat": 32.796335472450465, "lng": 35.53362035787062, "geo_src": "מודיעין עילית, Israel"}, {"code": "338186", "city": "מודיעין עילית", "name": "המסילה", "stage": "יסודי", "gender": "בנים", "address": "רבי עקיבא 39, מודיעין עילית", "principal": "הרב יעקב הלי", "phone": "08-6526565", "lat": 32.79612396976651, "lng": 35.533668631978045, "geo_src": "מודיעין עילית, Israel"}, {"code": "344051", "city": "מודיעין עילית", "name": "חסדי אבות", "stage": "יסודי", "gender": "בנות", "address": "ר' יהודה הנשיא 19, מודיעין עילית", "principal": "הרב שמעון צבי ליפשיץ", "phone": "08-9744488", "lat": 32.795954357783025, "lng": 35.53353337093478, "geo_src": "מודיעין עילית, Israel"}, {"code": "730473", "city": "מודיעין עילית", "name": "נחלת שלמה - (באיאן)", "stage": "יסודי", "gender": "בנים", "address": "בעל שם טוב 8, מודיעין עילית", "principal": "הרב טוביה גרומן", "phone": "08-8008600", "lat": 32.795954357783025, "lng": 35.53331642906522, "geo_src": "מודיעין עילית, Israel"}, {"code": "743682", "city": "מודיעין עילית", "name": "עטרת מלכה - באיאן-בנות", "stage": "יסודי", "gender": "בנות", "address": "בעל שם טוב 8, מודיעין עילית", "principal": "גב' טויבא גפנר", "phone": "08-8008650", "lat": 32.79612396976651, "lng": 35.533181168021954, "geo_src": "מודיעין עילית, Israel"}, {"code": "124123", "city": "מודיעין עילית", "name": "מאיר עיניים", "stage": "יסודי", "gender": "בנים", "address": "אורחות צדיקים, קריית ספר", "principal": "הרב אפרים מוסאי", "phone": "08-9743937", "lat": 32.796335472450465, "lng": 35.53322944212938, "geo_src": "מודיעין עילית, Israel"}, {"code": "188078", "city": "מעלה מכמש", "name": "ת\"ת מעלה מכמש", "stage": "יסודי", "gender": "בנים", "address": "מעלה מכמש ד.נ. מזרח בנימין מ: 90694", "principal": "הרב רועי שמחוביץ", "phone": "02-5476622", "lat": null, "lng": null, "geo_src": null}, {"code": "660662", "city": "מעלה אפרים", "name": "תורת חיים", "stage": "יסודי", "gender": "בנים", "address": "מעלה אפרים 1, מעלה אפרים", "principal": "הרב רועי שומר", "phone": "", "lat": 32.3245869, "lng": 34.8475908, "geo_src": "מעלה אפרים, Israel"}, {"code": "214312", "city": "מעלות-תרשיחא", "name": "באר החיים", "stage": "יסודי", "gender": "בנים", "address": "כליל החורש 12 מעלות", "principal": "הרב דביר לוזון", "phone": "04-9570471", "lat": 33.012031300000004, "lng": 35.2815558, "geo_src": "כליל החורש 12 מעלות, מעלות-תרשיחא, Israel"}, {"code": "214312", "city": "מעלות-תרשיחא", "name": "באר החיים / בית יעקב", "stage": "יסודי", "gender": "בנות", "address": "כליל החורש 12, מעלות", "principal": "גב' מיכל כהן", "phone": "", "lat": 33.0115313, "lng": 35.2815558, "geo_src": "כליל החורש 12, מעלות, מעלות-תרשיחא, Israel"}, {"code": "611111", "city": "מצפה רמון", "name": "מצפה רמון (מעורב)", "stage": "יסודי", "gender": "בנים", "address": "עין עופרים 18, מצפה רמון", "principal": "הרב מאיר קדוש", "phone": "08-6586473", "lat": 30.612603800000002, "lng": 34.7992063, "geo_src": "עין עופרים 18, מצפה רמון, Israel"}, {"code": "611111", "city": "מצפה רמון", "name": "מצפה רמון (מעורב)", "stage": "יסודי", "gender": "בנות", "address": "עין עופרים 18, מצפה רמון", "principal": "הרב מאיר קדוש", "phone": "08-6586473", "lat": 30.6121038, "lng": 34.7992063, "geo_src": "עין עופרים 18, מצפה רמון, Israel"}, {"code": "732214", "city": "נהריה", "name": "בנות אסתר", "stage": "יסודי", "gender": "בנות", "address": "הרמב\"ם 2, נהריה", "principal": "גב' מרים סבאג", "phone": "04-8418410", "lat": 33.006306, "lng": 35.0945579, "geo_src": "נהריה, Israel"}, {"code": "768622", "city": "שדות נגב/נתיבות", "name": "דרכי אבות", "stage": "יסודי", "gender": "בנים", "address": "אבוחצירא 58, נתיבות", "principal": "הרב יאיר אלחדד", "phone": "052-7632872", "lat": 31.4311023, "lng": 34.5925215, "geo_src": "שדות נגב/נתיבות, Israel"}, {"code": "613711", "city": "נתיבות", "name": "אוהל משה - בנות", "stage": "יסודי", "gender": "בנות", "address": "רח' האגוז 12, נתיבות", "principal": "גב' לאה אריה", "phone": "08-9931811", "lat": 31.421604600000002, "lng": 34.5884252, "geo_src": "נתיבות, Israel"}, {"code": "633834", "city": "נתיבות", "name": "אפיקי ים", "stage": "יסודי", "gender": "בנות", "address": "חזון איש 17, נתיבות", "principal": "גב' חפציבה מרים מלכה", "phone": "", "lat": 31.4289996, "lng": 34.5962034, "geo_src": "חזון איש 17, נתיבות, Israel"}, {"code": "610824", "city": "נתיבות", "name": "באר מרים", "stage": "יסודי", "gender": "בנות", "address": "חזון איש 13, נתיבות", "principal": "גב' יפית אטלן", "phone": "08-6786752", "lat": 31.4286246, "lng": 34.596419906350945, "geo_src": "חזון איש 13, נתיבות, Israel"}, {"code": "640342", "city": "נתיבות", "name": "זכרון ישראל", "stage": "יסודי", "gender": "בנים", "address": "חזון איש 8, נתיבות", "principal": "הרב יונתן אלמקייס", "phone": "08-9940927", "lat": 31.4286246, "lng": 34.595986893649055, "geo_src": "חזון איש 8, נתיבות, Israel"}, {"code": "640300", "city": "נתיבות", "name": "יד המלך", "stage": "יסודי", "gender": "בנים", "address": "אחד עשר הנקודות, נתיבות", "principal": "הרב ישי פישמן", "phone": "08-6999499", "lat": 31.4212296, "lng": 34.58864170635095, "geo_src": "נתיבות, Israel"}, {"code": "675272", "city": "נתיבות", "name": "מעלות אסתר", "stage": "יסודי", "gender": "בנות", "address": "יוסף הכהן 2, נתיבות", "principal": "גב' מיכל רביבו", "phone": "08-9931264", "lat": 31.4249883, "lng": 34.590371, "geo_src": "יוסף הכהן 2, נתיבות, Israel"}, {"code": "615153", "city": "נתיבות", "name": "נווה חיה", "stage": "יסודי", "gender": "בנות", "address": "האגוז 102, נתיבות", "principal": "הגב' שמחה בר ששת", "phone": "08-9948404", "lat": 31.4212296, "lng": 34.58820869364906, "geo_src": "נתיבות, Israel"}, {"code": "614834", "city": "נתיבות", "name": "נתיבות יהודה", "stage": "יסודי", "gender": "בנים", "address": "קהילות יעקב 3, נתיבות", "principal": "הרב ירון דניאל", "phone": "08-9944854", "lat": 31.4280715, "lng": 34.5832752, "geo_src": "קהילות יעקב 3, נתיבות, Israel"}, {"code": "614651", "city": "נתיבות", "name": "נתיבי אור", "stage": "יסודי", "gender": "בנים", "address": "מזוז 8, נתיבות", "principal": "הרב יעקב ארוש", "phone": "08-9931985", "lat": 31.426677400000003, "lng": 34.5840627, "geo_src": "מזוז 8, נתיבות, Israel"}, {"code": "614651", "city": "נתיבות", "name": "נתיבי אור", "stage": "יסודי", "gender": "בנות", "address": "מזוז 8, נתיבות", "principal": "הרב יעקב ארוש", "phone": "08-9931985", "lat": 31.4261774, "lng": 34.5840627, "geo_src": "מזוז 8, נתיבות, Israel"}, {"code": "662940", "city": "נתיבות", "name": "תיכון באר מרים (תיכון בנות)", "stage": "תיכון", "gender": "בנות", "address": "חזני 1135, נתיבות", "principal": "גב' רות כהן", "phone": "", "lat": 31.4274742, "lng": 34.5914948, "geo_src": "חזני 1135, נתיבות, Israel"}, {"code": "414763", "city": "נתניה", "name": "אור לציון/תפארת למשה", "stage": "יסודי", "gender": "בנים", "address": "הגר''א 4 נתניה", "principal": "הרב רוני גבאי", "phone": "09-8655603", "lat": 32.3103968, "lng": 34.8574515, "geo_src": "הגר''א 4 נתניה, Israel"}, {"code": "657361", "city": "נתניה", "name": "אורות ישראל", "stage": "יסודי", "gender": "בנים", "address": "חפץ חיים 801 סוף לוי אשכול נתניה", "principal": "הרב נתנאל לוי", "phone": "", "lat": 32.3288681, "lng": 34.8566246, "geo_src": "נתניה, Israel"}, {"code": "442582", "city": "נתניה", "name": "דרכי משה", "stage": "יסודי", "gender": "בנים", "address": "השומר 4, נתניה", "principal": "הרב אריה מאיר", "phone": "09-7748126", "lat": 32.3111142, "lng": 34.8804941, "geo_src": "השומר 4, נתניה, Israel"}, {"code": "745901", "city": "נתניה", "name": "תיכון בנות מלך", "stage": "תיכון", "gender": "בנות", "address": "השומר 4, נתניה", "principal": "גב' תמר שאר", "phone": "09-8853398", "lat": 32.310614199999996, "lng": 34.8804941, "geo_src": "השומר 4, נתניה, Israel"}, {"code": "414821", "city": "נתניה", "name": "עוז והדר/הרי\"ף", "stage": "יסודי", "gender": "בנים", "address": "רח' אליהו עטיה 4, נתניה", "principal": "הרב בנימין עמרן", "phone": "077-5505112 09-8359661", "lat": 32.3286181, "lng": 34.856874600000005, "geo_src": "נתניה, Israel"}, {"code": "414821", "city": "נתניה", "name": "עוז והדר/הרי\"ף", "stage": "יסודי", "gender": "בנות", "address": "רח' אליהו עטיה 4, נתניה", "principal": "גב' מעיין קוירט", "phone": "077-5505112 09-8359661", "lat": 32.3283681, "lng": 34.8566246, "geo_src": "נתניה, Israel"}, {"code": "659896", "city": "נתניה", "name": "עטרת בית יעקב", "stage": "יסודי", "gender": "בנות", "address": "הלחי 19, נתניה", "principal": "גב' אסתר אליהו", "phone": "09-8853398", "lat": 32.3286181, "lng": 34.8563746, "geo_src": "נתניה, Israel"}, {"code": "499673", "city": "עכו", "name": "ברכת ישראל", "stage": "יסודי", "gender": "בנות", "address": "משה שרת 6 ב' עכו", "principal": "גב' ברוריה אילוז", "phone": "04-9813841", "lat": 32.9314466, "lng": 35.0809904, "geo_src": "משה שרת 6 ב' עכו, Israel"}, {"code": "214296", "city": "עכו", "name": "ברכת ישראל/באר יוסף", "stage": "יסודי", "gender": "בנים", "address": "משה שרת 6 ב' עכו", "principal": "הרב עודד סיבוני", "phone": "04-9813841", "lat": 32.9309466, "lng": 35.0809904, "geo_src": "משה שרת 6 ב' עכו, Israel"}, {"code": "142646", "city": "עלי", "name": "הדר יוסף (בנים)", "stage": "יסודי", "gender": "בנים", "address": "האגוז 901, עלי", "principal": "הרב ישי בן שלום", "phone": "02-9400148", "lat": 31.6550185, "lng": 34.5793249, "geo_src": "עלי, Israel"}, {"code": "410472", "city": "עמנואל", "name": "אוהל רחל", "stage": "יסודי", "gender": "בנות", "address": "הגר\"א 28, עמנואל", "principal": "גב' לאה טנג'י", "phone": "09-7921987", "lat": 31.6672058, "lng": 34.5927448, "geo_src": "עמנואל, Israel"}, {"code": "414698", "city": "עמנואל", "name": "אוהלי יעקב", "stage": "יסודי", "gender": "בנים", "address": "הגר''א 27 עמנואל", "principal": "הרב ציון לוי", "phone": "09-7921089", "lat": 31.6667058, "lng": 34.5927448, "geo_src": "עמנואל, Israel"}, {"code": "760041", "city": "עפולה", "name": "בית יעקב זוהרי התורה", "stage": "יסודי", "gender": "בנות", "address": "יצחק שדה 15, עפולה", "principal": "גב' יפה ויצמן", "phone": "04-8714191", "lat": 32.633196, "lng": 35.320931, "geo_src": "יצחק שדה 15, עפולה, Israel"}, {"code": "415836", "city": "פתח תקוה", "name": "אהבת ציון", "stage": "יסודי", "gender": "בנות", "address": "רבי יהודה הנשיא 22 פתח תקוה", "principal": "גב' מירי רבין", "phone": "03-9331507", "lat": 32.0702903, "lng": 34.9058163, "geo_src": "רבי יהודה הנשיא 22 פתח תקוה, Israel"}, {"code": "421131", "city": "פתח תקוה", "name": "בית יהודה", "stage": "יסודי", "gender": "בנים", "address": "יאיר חפותא 4, פתח תקוה", "principal": "הרב אורי עמר", "phone": "03-9044170", "lat": 32.0877639, "lng": 34.8859985, "geo_src": "פתח תקוה, Israel"}, {"code": "413286", "city": "פתח תקוה", "name": "מרחביה", "stage": "יסודי", "gender": "בנים", "address": "יונה 74, פתח תקוה", "principal": "הרב שמואל יצחק", "phone": "03-9332601", "lat": 32.0723074, "lng": 34.8994546, "geo_src": "יונה 74, פתח תקוה, Israel"}, {"code": "415208", "city": "פתח תקוה", "name": "נאות מרגלית", "stage": "יסודי", "gender": "בנים", "address": "דורני שלום 2, פתח תקוה", "principal": "הרב רועי אביצור", "phone": "03-9131600", "lat": 32.0992556, "lng": 34.8890759, "geo_src": "דורני שלום 2, פתח תקוה, Israel"}, {"code": "415208", "city": "פתח תקוה", "name": "נאות מרגלית", "stage": "יסודי", "gender": "בנות", "address": "דורני שלום 2, פתח תקוה", "principal": "הרב רועי אביצור", "phone": "03-9131600", "lat": 32.0987556, "lng": 34.8890759, "geo_src": "דורני שלום 2, פתח תקוה, Israel"}, {"code": "415828", "city": "פתח תקוה", "name": "נטיעים", "stage": "יסודי", "gender": "בנים", "address": "השופר 85, פתח תקוה", "principal": "הרב שלמה ביטון", "phone": "03-9331817", "lat": 32.080317, "lng": 34.9060636, "geo_src": "השופר 85, פתח תקוה, Israel"}, {"code": "514604", "city": "פתח תקוה", "name": "פאר משה", "stage": "יסודי", "gender": "בנים", "address": "יעקב קרול 20, פתח תקוה", "principal": "הרב מאיר זקבך", "phone": "03-9211095", "lat": 32.0936276, "lng": 34.8784106, "geo_src": "יעקב קרול 20, פתח תקוה, Israel"}, {"code": "416271", "city": "פתח תקוה", "name": "שירת יוסף", "stage": "יסודי", "gender": "בנים", "address": "קראוסמן 8, פתח תקוה", "principal": "הרב שאול בובליל", "phone": "03-9080455", "lat": 32.0721105, "lng": 34.9067131, "geo_src": "קראוסמן 8, פתח תקוה, Israel"}, {"code": "213868", "city": "צפת", "name": "אלקב\"ץ", "stage": "יסודי", "gender": "בנים", "address": "צה\"ל 4, צפת", "principal": "הרב אוריאל דבוש", "phone": "04-68203860 04-69227130", "lat": 32.9657071, "lng": 35.487694, "geo_src": "צה\"ל 4, צפת, Israel"}, {"code": "373357", "city": "צפת", "name": "כנפי יונה", "stage": "תיכון", "gender": "בנות", "address": "לוחמי הגטאות 4, צפת", "principal": "גב' עינב ביטון", "phone": "04-6922887", "lat": 32.9586705, "lng": 35.4996121, "geo_src": "לוחמי הגטאות 4, צפת, Israel"}, {"code": "213439", "city": "צפת", "name": "פרחי כהונה", "stage": "יסודי", "gender": "בנים", "address": "יאנוש קורצ'אק 1 צפת", "principal": "הרב יגאל כהן", "phone": "04-6999315/ שלוחה 13", "lat": 32.963539, "lng": 35.4948243, "geo_src": "יאנוש קורצ'אק 1 צפת, Israel"}, {"code": "615179", "city": "קריית מלאכי", "name": "בית יוסף", "stage": "יסודי", "gender": "בנים", "address": "הרב עובדיה יוסף 8 קרית מלאכי", "principal": "הרב משה מיארה", "phone": "08-8585450", "lat": 31.615614, "lng": 34.7537138, "geo_src": "הרב עובדיה יוסף 8 קרית מלאכי, קריית מלאכי, Israel"}, {"code": "632356", "city": "קרית אתא", "name": "אוצר התורה", "stage": "יסודי", "gender": "בנים", "address": "אלבז 24, קריית אתא", "principal": "הרב ערן בן פורת", "phone": "04-7793565", "lat": 32.8042256, "lng": 35.1041474, "geo_src": "קרית אתא, Israel"}, {"code": "613778", "city": "קרית גת", "name": "אמת ושלום", "stage": "יסודי", "gender": "בנים", "address": "איבצן 2 קרית גת", "principal": "הרב חגי אברג'ל", "phone": "08-6883883 08-6811095", "lat": 31.6096498, "lng": 34.7711983, "geo_src": "קרית גת, Israel"}, {"code": "613778", "city": "קרית גת", "name": "אמת ושלום", "stage": "יסודי", "gender": "בנות", "address": "איבצן 2 קרית גת", "principal": "הרב חגי אברג'ל", "phone": "08-6883883 08-6811095", "lat": 31.6093998, "lng": 34.7714483, "geo_src": "קרית גת, Israel"}, {"code": "610626", "city": "קרית גת", "name": "בית יעקב בנות כה תאמר", "stage": "יסודי", "gender": "בנות", "address": "שדרות גת 120 קרית גת (משעול צור)", "principal": "גב' חגית אריאלי", "phone": "08-6886640", "lat": 31.609149799999997, "lng": 34.7711983, "geo_src": "קרית גת, Israel"}, {"code": "613752", "city": "קרית גת", "name": "דרכי נסים (מפי עוללים)", "stage": "יסודי", "gender": "בנים", "address": "החלוץ 52, קרית גת", "principal": "הרב חנניה כהן", "phone": "08-6818481", "lat": 31.6107252, "lng": 34.758165, "geo_src": "החלוץ 52, קרית גת, Israel"}, {"code": "667097", "city": "קרית גת", "name": "תיכון בית יעקב החדש", "stage": "תיכון", "gender": "בנות", "address": "שדרות גת 120 קרית גת (משעול צור)", "principal": "גב' שרה טיישר", "phone": "", "lat": 31.6093998, "lng": 34.7709483, "geo_src": "קרית גת, Israel"}, {"code": "416966", "city": "ראש העין", "name": "בעקבי הצאן", "stage": "פטור", "gender": "בנים", "address": "חזון איש 84, ראש העין", "principal": "הרב יאיר בשארי", "phone": "03-9021552", "lat": 32.1001203, "lng": 34.9435156, "geo_src": "חזון איש 84, ראש העין, Israel"}, {"code": "417113", "city": "ראשון לציון", "name": "מגן אברהם", "stage": "יסודי", "gender": "בנים", "address": "וילנסקי 2 ראשון לציון", "principal": "הרב מנשה מוסאי", "phone": "03-9494016", "lat": 31.9833626, "lng": 34.7841177, "geo_src": "וילנסקי 2 ראשון לציון, Israel"}, {"code": "414789", "city": "רחובות", "name": "אור לציון / בנות יוסף", "stage": "יסודי", "gender": "בנות", "address": "זכריה מדר 28, רחובות", "principal": "גב' אפרת דוד", "phone": "08-9352462", "lat": 31.8901373, "lng": 34.8190243, "geo_src": "זכריה מדר 28, רחובות, Israel"}, {"code": "416453", "city": "רחובות", "name": "בן איש חיל", "stage": "יסודי", "gender": "בנים", "address": "נפתלי בן אפרים 4, רחובות", "principal": "הרב יגאל עומסי", "phone": "08-9495183", "lat": 31.8888992, "lng": 34.8219694, "geo_src": "נפתלי בן אפרים 4, רחובות, Israel"}, {"code": "742189", "city": "רחובות", "name": "התיכון התורני החדש", "stage": "תיכון", "gender": "בנות", "address": "דרך ירושלים 1, רחובות", "principal": "גב' ליאת סלם", "phone": "08-9352462", "lat": 31.8952532, "lng": 34.8105616, "geo_src": "רחובות, Israel"}, {"code": "312686", "city": "רכסים", "name": "דרכי תורה", "stage": "יסודי", "gender": "בנים", "address": "בני תורה גבעה ב' רכסים", "principal": "הרב שחר חכימי", "phone": "04-9847495", "lat": 32.75413, "lng": 35.1031888, "geo_src": "בני תורה גבעה ב' רכסים, Israel"}, {"code": "313809", "city": "רכסים", "name": "יקירי רכסים", "stage": "יסודי", "gender": "בנים", "address": "הרב עובדיה יוסף 12, רכסים", "principal": "הרב יורם עדיקה", "phone": "04-9040707", "lat": 32.7526374, "lng": 35.1050193, "geo_src": "הרב עובדיה יוסף 12, רכסים, Israel"}, {"code": "756544", "city": "רכסים", "name": "נוות יעקב", "stage": "יסודי", "gender": "בנות", "address": "מעלה צוהר 2 רכסים", "principal": "גב' מרים סבג", "phone": "04-8805930", "lat": 32.7509558, "lng": 35.1013589, "geo_src": "רכסים, Israel"}, {"code": "788703", "city": "רמלה", "name": "אוהל יצחק", "stage": "יסודי", "gender": "בנים", "address": "דוד רזיאל 24, רמלה", "principal": "הרב דניאל טסה", "phone": "הרב דור מדלה\n052-7616911", "lat": 31.9217839, "lng": 34.8613349, "geo_src": "דוד רזיאל 24, רמלה, Israel"}, {"code": "416255", "city": "רמלה", "name": "טללי החיים", "stage": "יסודי", "gender": "בנים", "address": "הזית 4 רמלה", "principal": "הרב אשר דגגה", "phone": "08-9295761", "lat": 31.9270941, "lng": 34.8531666, "geo_src": "הזית 4 רמלה, Israel"}, {"code": "416255", "city": "רמלה", "name": "טללי החיים", "stage": "יסודי", "gender": "בנות", "address": "הזית 4 רמלה", "principal": "הרב אשר דגגה", "phone": "08-9295761", "lat": 31.9265941, "lng": 34.8531666, "geo_src": "הזית 4 רמלה, Israel"}, {"code": "514372", "city": "רמת גן", "name": "בן איש חיל", "stage": "יסודי", "gender": "בנים", "address": "האצ\"ל 14, רמת גן", "principal": "הרב ישראל ניסן", "phone": "03-6776714", "lat": 32.0686867, "lng": 34.8246812, "geo_src": "רמת גן, Israel"}, {"code": "514372", "city": "רמת גן", "name": "בנות חיל", "stage": "יסודי", "gender": "בנות", "address": "אלימלך 13 ב' רמת גן", "principal": "גב' צילה ניסן", "phone": "03-6722208", "lat": 32.0865607, "lng": 34.8161127, "geo_src": "אלימלך 13 ב' רמת גן, Israel"}, {"code": "659623", "city": "רעננה", "name": "נחלת דוד", "stage": "יסודי", "gender": "בנים", "address": "שמואל הנגיד 37, רעננה", "principal": "הרב דב שטראוך", "phone": "09-7684311", "lat": 32.191687, "lng": 34.87185, "geo_src": "שמואל הנגיד 37, רעננה, Israel"}, {"code": "659623", "city": "רעננה", "name": "נחלת דוד", "stage": "יסודי", "gender": "בנות", "address": "שמואל הנגיד 37, רעננה", "principal": "הרב דב שטראוך", "phone": "09-7684311", "lat": 32.191187, "lng": 34.87185, "geo_src": "שמואל הנגיד 37, רעננה, Israel"}, {"code": "613331", "city": "שדות נגב", "name": "אהל משה", "stage": "יסודי", "gender": "בנים", "address": "מועצה איזורית שדות נגב", "principal": "הרב רחמים חניה", "phone": "08-9941727/2", "lat": 31.431460400000002, "lng": 34.5909147, "geo_src": "שדות נגב, Israel"}, {"code": "633461", "city": "שדות נגב", "name": "ת\"ת שדות נגב", "stage": "יסודי", "gender": "בנים", "address": "מועצה איזורית שדות נגב", "principal": "הרב שמעון שוקרון", "phone": "055-5579378", "lat": 31.4310854, "lng": 34.591131206350944, "geo_src": "שדות נגב, Israel"}, {"code": "633461", "city": "שדות נגב", "name": "ת\"ת שדות נגב", "stage": "יסודי", "gender": "בנות", "address": "מועצה איזורית שדות נגב", "principal": "הרב שמעון שוקרון", "phone": "055-5579378", "lat": 31.4310854, "lng": 34.590698193649054, "geo_src": "שדות נגב, Israel"}, {"code": "759704", "city": "שדרות", "name": "בני יוסף", "stage": "יסודי", "gender": "בנים", "address": "שאר ישוב 3, שדרות", "principal": "הרב אברהם ויצמן", "phone": "08-6416463", "lat": 31.5267737, "lng": 34.6028681, "geo_src": "שאר ישוב 3, שדרות, Israel"}, {"code": "759704", "city": "שדרות", "name": "בני יוסף", "stage": "יסודי", "gender": "בנים", "address": "שאר ישוב 3, שדרות", "principal": "הרב אלחנן ויצמן", "phone": "08-6416463", "lat": 31.526273699999997, "lng": 34.6028681, "geo_src": "שאר ישוב 3, שדרות, Israel"}, {"code": "614362", "city": "שדרות", "name": "עטרת אסתר/מעלות", "stage": "יסודי", "gender": "בנות", "address": "האקדמיה 1, שדרות", "principal": "גב' שושנה עזרן", "phone": "08-6613130", "lat": 31.5329179, "lng": 34.5925514, "geo_src": "האקדמיה 1, שדרות, Israel"}, {"code": "615344", "city": "שדרות", "name": "שירת ברכה", "stage": "תיכון", "gender": "בנות", "address": "", "principal": "גב' אורה סבז", "phone": "", "lat": 31.526474, "lng": 34.5969696, "geo_src": "שדרות, Israel"}, {"code": "613687", "city": "שומריה", "name": "ת\"ת עצמונה", "stage": "יסודי", "gender": "בנים", "address": "שומריה", "principal": "הרב רחמים עמרני", "phone": "08-6817769", "lat": 31.4317698, "lng": 34.8857795, "geo_src": "שומריה, Israel"}, {"code": "442574", "city": "שילת", "name": "למען אחי", "stage": "יסודי", "gender": "בנים", "address": "נפתלי 6, אזור תעשיה שילת", "principal": "גב' אורלי יונה", "phone": "08-9717711", "lat": 31.920810600000003, "lng": 35.0173195, "geo_src": "שילת, Israel"}, {"code": "442574", "city": "שילת", "name": "למען אחי", "stage": "יסודי", "gender": "בנות", "address": "נפתלי 6, אזור תעשיה שילת", "principal": "גב' אורלי יונה", "phone": "08-9717711", "lat": 31.9203106, "lng": 35.0173195, "geo_src": "שילת, Israel"}, {"code": "515452", "city": "תל אביב-יפו", "name": "אמרי דוד", "stage": "יסודי", "gender": "בנים", "address": "דרך ההגנה 106, תל אביב", "principal": "הרב אהרון טוויג", "phone": "03-6538364ראשי 03-6884481", "lat": 32.0568286, "lng": 34.8037066, "geo_src": "דרך ההגנה 106, תל אביב, תל אביב-יפו, Israel"}, {"code": "514976", "city": "תל אביב-יפו", "name": "בנות צפורה (רש\"י)", "stage": "יסודי", "gender": "בנות", "address": "זלמן שזר 39, שכ' נווה עופר, תל אביב", "principal": "גב' נחמה טרבסלי", "phone": "03-6812036 03-6810360", "lat": 32.0855497, "lng": 34.7818064, "geo_src": "תל אביב-יפו, Israel"}, {"code": "514885", "city": "תל אביב-יפו", "name": "ת\"ת פיתוחי חותם", "stage": "יסודי", "gender": "בנים", "address": "רבנו משה איסרליש 5 תל אביב", "principal": "הרב שמעון חיררי", "phone": "03-5614666", "lat": 32.0851747, "lng": 34.782022906350946, "geo_src": "תל אביב-יפו, Israel"}, {"code": "514166", "city": "תל אביב-יפו", "name": "ת\"ת רש''י-בני ראובן", "stage": "יסודי", "gender": "בנים", "address": "צונץ 11 תל אביב", "principal": "הרב אליהו שבתאי", "phone": "03-6821982", "lat": 32.043149, "lng": 34.763569, "geo_src": "צונץ 11 תל אביב, תל אביב-יפו, Israel"}, {"code": "514851", "city": "תל אביב-יפו", "name": "שער שמעון-אור תורה", "stage": "יסודי", "gender": "בנות", "address": "רבנו משה איסרליש 5 תל אביב", "principal": "גב' מיכל חיררי", "phone": "03-5614666", "lat": 32.0851747, "lng": 34.781589893649056, "geo_src": "תל אביב-יפו, Israel"}]</script>
+    <script>
+        const data = JSON.parse(document.getElementById('mosdotData').textContent);
+        window.mosdotRows = data;
+        const searchInput = document.getElementById('searchInput');
+        const stageFilter = document.getElementById('stageFilter');
+        const genderFilter = document.getElementById('genderFilter');
+        const tableBody = document.getElementById('tableBody');
+        const resultCount = document.getElementById('resultCount');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Populate filter dropdowns from data
+        const stages = [...new Set(data.map(r => r.stage).filter(Boolean))].sort();
+        const genders = [...new Set(data.map(r => r.gender).filter(Boolean))].sort();
+        stages.forEach(s => {
+            const o = document.createElement('option'); o.value = s; o.textContent = s;
+            stageFilter.appendChild(o);
+        });
+        genders.forEach(g => {
+            const o = document.createElement('option'); o.value = g; o.textContent = g;
+            genderFilter.appendChild(o);
+        });
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function render() {
+            const q = searchInput.value.trim().toLowerCase();
+            const stage = stageFilter.value;
+            const gender = genderFilter.value;
+
+            const filtered = data.filter(r => {
+                if (stage && r.stage !== stage) return false;
+                if (gender && r.gender !== gender) return false;
+                if (!q) return true;
+                return (r.name + ' ' + r.city + ' ' + r.address + ' ' + r.principal + ' ' + r.phone + ' ' + r.code)
+                    .toLowerCase().includes(q);
+            });
+
+            resultCount.textContent = `מציג ${filtered.length} מתוך ${data.length} מוסדות`;
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="no-results">לא נמצאו מוסדות התואמים לחיפוש</td></tr>';
+                return;
+            }
+
+            const rows = filtered.map(r => {
+                const genderClass = r.gender ? `badge badge-gender-${r.gender}` : '';
+                const genderHtml = r.gender ? `<span class="${genderClass}">${escapeHtml(r.gender)}</span>` : '';
+                const stageHtml = r.stage ? `<span class="badge badge-stage">${escapeHtml(r.stage)}</span>` : '';
+                const phoneHtml = r.phone ? `<a href="tel:${escapeHtml(r.phone.replace(/\s/g,''))}" style="color:#5a3a22;text-decoration:none;">${escapeHtml(r.phone)}</a>` : '';
+                return `<tr>
+                    <td>${escapeHtml(r.code)}</td>
+                    <td><strong>${escapeHtml(r.name)}</strong></td>
+                    <td>${escapeHtml(r.city)}</td>
+                    <td>${stageHtml}</td>
+                    <td>${genderHtml}</td>
+                    <td>${escapeHtml(r.address)}</td>
+                    <td>${escapeHtml(r.principal)}</td>
+                    <td>${phoneHtml}</td>
+                </tr>`;
+            }).join('');
+            tableBody.innerHTML = rows;
+        }
+
+        searchInput.addEventListener('input', render);
+        stageFilter.addEventListener('change', render);
+        genderFilter.addEventListener('change', render);
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            stageFilter.value = '';
+            genderFilter.value = '';
+            render();
+        });
+
+        render();
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script>
+        (function initMap() {
+            const rows = window.mosdotRows || [];
+            const located = rows.filter(r => typeof r.lat === 'number' && typeof r.lng === 'number');
+            const mapMeta = document.getElementById('mapMeta');
+            mapMeta.textContent = `${located.length} מתוך ${rows.length} מוסדות ממוקמים על המפה`;
+
+            const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,
+                c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            const map = L.map('map', {
+                scrollWheelZoom: false,
+                tap: true
+            }).setView([31.5, 34.9], 7);
+
+            const mapEl = document.getElementById('map');
+            // Hover over the map → Leaflet handles wheel + ctrl+wheel (pinch).
+            // Leave the map → page scroll/zoom resumes normal behavior.
+            mapEl.addEventListener('mouseenter', () => map.scrollWheelZoom.enable());
+            mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+
+            // Block the browser's own pinch-zoom-the-page behavior over the map.
+            mapEl.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) e.preventDefault();
+            }, { passive: false, capture: true });
+            // Safari trackpad gesture events
+            ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => {
+                mapEl.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            const cluster = L.markerClusterGroup({ maxClusterRadius: 45 });
+
+            function popupHtml(r) {
+                const phone = r.phone
+                    ? `<a href="tel:${(r.phone||'').replace(/\s/g,'')}">${escapeHtml(r.phone)}</a>`
+                    : '';
+                return [
+                    `<strong>${escapeHtml(r.name)}</strong>`,
+                    `<div class="meta">`,
+                    r.city ? `📍 ${escapeHtml(r.city)}<br>` : '',
+                    r.address ? `${escapeHtml(r.address)}<br>` : '',
+                    (r.stage || r.gender) ? `${escapeHtml([r.stage, r.gender].filter(Boolean).join(' · '))}<br>` : '',
+                    r.principal ? `👤 ${escapeHtml(r.principal)}<br>` : '',
+                    phone ? `📞 ${phone}` : '',
+                    `</div>`
+                ].join('');
+            }
+
+            located.forEach(r => {
+                const marker = L.marker([r.lat, r.lng]);
+                marker.bindPopup(popupHtml(r));
+                cluster.addLayer(marker);
+            });
+            map.addLayer(cluster);
+
+            if (located.length > 0) {
+                try { map.fitBounds(cluster.getBounds(), { padding: [30, 30] }); } catch (e) {}
+            }
+
+            setTimeout(() => map.invalidateSize(), 50);
+        })();
+    </script>
 </body>
 
 </html>
