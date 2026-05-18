@@ -1,4 +1,112 @@
 <?php
+// ============================================================
+// SMTP configuration — fill these in from your hosting panel.
+// For bney.org.il, look in cPanel → "Email Accounts" → click
+// "Connect Devices" / "Configure Email Client" on the mailbox
+// you want to send FROM. It will list host, port, SSL/TLS,
+// and the username (full email address) + the password you set.
+// ============================================================
+$SMTP_HOST   = 'bney.org.il';        // e.g. mail.bney.org.il or smtp.bney.org.il
+$SMTP_PORT   = 465;                  // 465 = SSL, 587 = STARTTLS, 25 = none
+$SMTP_SECURE = 'ssl';                // 'ssl', 'tls', or '' (none)
+$SMTP_USER   = 'support@bney.org.il';   // full mailbox, e.g. support@bney.org.il
+$SMTP_PASS   = 'Dp5(vjwTdZ@(';          // that mailbox's password
+$MAIL_TO     = 'moked@bney.org.il';  // recipient of submissions
+$SHOW_SMTP_ERROR = true;             // set false in production to hide raw error
+
+function smtp_send(
+    string $host, int $port, string $secure,
+    string $user, string $pass,
+    string $from_email, string $from_name,
+    string $to, string $reply_to,
+    string $subject_utf8, string $body_utf8
+): bool|string {
+    $remote = ($secure === 'ssl') ? "ssl://{$host}" : $host;
+    $sock = @stream_socket_client("{$remote}:{$port}", $errno, $errstr, 20);
+    if (!$sock) return "connect failed: {$errstr} ({$errno})";
+    stream_set_timeout($sock, 20);
+
+    $read = function () use ($sock) {
+        $data = '';
+        while (($line = fgets($sock, 1024)) !== false) {
+            $data .= $line;
+            if (strlen($line) >= 4 && $line[3] === ' ') break;
+        }
+        return $data;
+    };
+    $write = function (string $cmd) use ($sock) { fwrite($sock, $cmd . "\r\n"); };
+    $expect = function (string $r, string $code) {
+        return substr($r, 0, 3) === $code;
+    };
+
+    $r = $read();
+    if (!$expect($r, '220')) return "banner: {$r}";
+
+    $write("EHLO " . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+    $r = $read();
+    if (!$expect($r, '250')) return "EHLO: {$r}";
+
+    if ($secure === 'tls') {
+        $write('STARTTLS');
+        $r = $read();
+        if (!$expect($r, '220')) return "STARTTLS: {$r}";
+        if (!stream_socket_enable_crypto($sock, true,
+            STREAM_CRYPTO_METHOD_TLS_CLIENT |
+            STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT |
+            STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT)) {
+            return "TLS handshake failed";
+        }
+        $write("EHLO " . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        $r = $read();
+        if (!$expect($r, '250')) return "EHLO(TLS): {$r}";
+    }
+
+    $write('AUTH LOGIN');
+    $r = $read();
+    if (!$expect($r, '334')) return "AUTH: {$r}";
+    $write(base64_encode($user));
+    $r = $read();
+    if (!$expect($r, '334')) return "AUTH user: {$r}";
+    $write(base64_encode($pass));
+    $r = $read();
+    if (!$expect($r, '235')) return "AUTH pass (credentials likely wrong): {$r}";
+
+    $write("MAIL FROM:<{$from_email}>");
+    $r = $read();
+    if (!$expect($r, '250')) return "MAIL FROM: {$r}";
+    $write("RCPT TO:<{$to}>");
+    $r = $read();
+    if (!$expect($r, '250')) return "RCPT TO: {$r}";
+    $write('DATA');
+    $r = $read();
+    if (!$expect($r, '354')) return "DATA: {$r}";
+
+    $name_enc = '=?UTF-8?B?' . base64_encode($from_name) . '?=';
+    $subj_enc = '=?UTF-8?B?' . base64_encode($subject_utf8) . '?=';
+    $date     = date('r');
+    $msgid    = '<' . bin2hex(random_bytes(8)) . '@' . $host . '>';
+
+    $msg  = "Date: {$date}\r\n";
+    $msg .= "Message-ID: {$msgid}\r\n";
+    $msg .= "From: {$name_enc} <{$from_email}>\r\n";
+    $msg .= "To: <{$to}>\r\n";
+    $msg .= "Reply-To: <{$reply_to}>\r\n";
+    $msg .= "Subject: {$subj_enc}\r\n";
+    $msg .= "MIME-Version: 1.0\r\n";
+    $msg .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $msg .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+    $msg .= str_replace("\r\n.\r\n", "\r\n..\r\n", str_replace("\n", "\r\n", $body_utf8));
+    $msg .= "\r\n.";
+
+    fwrite($sock, $msg . "\r\n");
+    $r = $read();
+    if (!$expect($r, '250')) return "body: {$r}";
+
+    $write('QUIT');
+    fclose($sock);
+    return true;
+}
+
 $status = '';
 $status_msg = '';
 
@@ -34,8 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status = 'error';
         $status_msg = 'כתובת מייל לא תקינה.';
     } else {
-        $to = 'amichaiberger14@gmail.com';
-        $mail_subject = '=?UTF-8?B?' . base64_encode('פנייה למוקד התמיכה - ' . $fields['subject']) . '?=';
+        $mail_subject = 'פנייה למוקד התמיכה - ' . $fields['subject'];
 
         $clean = function ($v) { return str_replace(["\r", "\n"], ' ', $v); };
 
@@ -56,18 +163,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $body .= "נושא הפנייה: " . $clean($fields['subject']) . "\n";
         $body .= "תוכן הפניה:\n" . $fields['content'] . "\n";
 
-        $headers  = "From: no-reply@m-m.org.il\r\n";
-        $headers .= "Reply-To: " . $clean($fields['email']) . "\r\n";
-        $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-        if (@mail($to, $mail_subject, $body, $headers)) {
-            $status = 'success';
-            $status_msg = 'הפנייה נשלחה בהצלחה. נחזור אליך בהקדם.';
-            foreach ($fields as $k => $_) { $fields[$k] = ''; }
-        } else {
+        if ($SMTP_USER === '' || $SMTP_PASS === '') {
             $status = 'error';
-            $status_msg = 'שליחת הפנייה נכשלה. נסו שוב מאוחר יותר.';
+            $status_msg = 'תצורת SMTP חסרה. יש למלא את $SMTP_USER ו-$SMTP_PASS בראש הקובץ.';
+        } else {
+            $result = smtp_send(
+                $SMTP_HOST, $SMTP_PORT, $SMTP_SECURE,
+                $SMTP_USER, $SMTP_PASS,
+                $SMTP_USER, 'מוקד תמיכה - בני יוסף',
+                $MAIL_TO, $clean($fields['email']),
+                $mail_subject, $body
+            );
+
+            if ($result === true) {
+                $status = 'success';
+                $status_msg = 'הפנייה נשלחה בהצלחה. נחזור אליך בהקדם.';
+                foreach ($fields as $k => $_) { $fields[$k] = ''; }
+            } else {
+                $status = 'error';
+                $status_msg = 'שליחת הפנייה נכשלה.' . ($SHOW_SMTP_ERROR ? ' [' . $result . ']' : ' נסו שוב מאוחר יותר.');
+            }
         }
     }
 }
